@@ -1,0 +1,83 @@
+\documentclass[tikz,border=5pt]{standalone}
+\usepackage{tikz}
+\usepackage{xeCJK}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, calc}
+
+\setCJKmainfont{STKaiti}
+
+\definecolor{llmcolor}{RGB}{100,149,237}      % Cornflower blue
+\definecolor{verifycolor}{RGB}{144,238,144}   % Light green
+\definecolor{hwcolor}{RGB}{255,182,108}       % Light orange
+\definecolor{inputcolor}{RGB}{200,200,200}    % Light gray
+\definecolor{outputcolor}{RGB}{255,218,185}   % Peach
+
+\begin{document}
+\begin{tikzpicture}[
+    node distance=1.2cm and 1.5cm,
+    box/.style={rectangle, rounded corners, draw, minimum width=2.8cm, minimum height=1cm, align=center, font=\small},
+    inputbox/.style={box, fill=inputcolor},
+    llmbox/.style={box, fill=llmcolor!40},
+    verifybox/.style={box, fill=verifycolor!60},
+    hwbox/.style={box, fill=hwcolor!70},
+    outputbox/.style={box, fill=outputcolor},
+    arrow/.style={-{Stealth[length=2mm]}, thick},
+    dasharrow/.style={-{Stealth[length=2mm]}, thick, dashed},
+    label/.style={font=\footnotesize\bfseries},
+]
+
+% Input layer
+\node[inputbox] (np) {NP困难问题\\SAT, TSP, MIS, ...};
+
+% LLM Discovery layer (研究内容一)
+\node[llmbox, right=2cm of np] (llm) {LLM候选生成\\知识库 + 提示工程};
+\node[llmbox, below=0.8cm of llm] (ilp) {ILP验证\\整数线性规划};
+\node[llmbox, below=0.8cm of ilp] (evolve) {进化优化\\AlphaEvolve式迭代};
+
+% Verification layer (研究内容二)
+\node[verifybox, right=2cm of llm] (lean) {Lean4证明\\形式化验证};
+\node[verifybox, below=0.8cm of lean] (smt) {SMT验证\\Z3穷举检验};
+
+% Hardware optimization layer (研究内容三)
+\node[hwbox, right=2cm of lean] (rydberg) {里德堡原子\\质量因子优化};
+\node[hwbox, below=0.8cm of rydberg] (dwave) {D-Wave\\嵌入优化};
+\node[hwbox, below=0.8cm of dwave] (tn) {张量网络\\树宽优化};
+
+% Output layer
+\node[outputbox, right=2cm of dwave] (output) {优化解\\实验验证};
+
+% Arrows - main flow
+\draw[arrow] (np) -- (llm);
+\draw[arrow] (llm) -- (ilp);
+\draw[arrow] (ilp) -- (evolve);
+\draw[arrow] (evolve.east) -- ++(0.5,0) |- (llm.south west);
+
+\draw[arrow] (ilp.east) -- (smt.west);
+\draw[arrow] (llm.east) -- (lean.west);
+
+\draw[arrow] (lean.east) -- (rydberg.west);
+\draw[arrow] (smt.east) -- (dwave.west);
+
+\draw[arrow] (rydberg.east) -- ++(0.5,0) |- (output.north west);
+\draw[arrow] (dwave) -- (output);
+\draw[arrow] (tn.east) -- ++(0.5,0) |- (output.south west);
+
+% Feedback arrow
+\draw[dasharrow, color=red!70!black] (output.south) -- ++(0,-0.8) -| ($(np.south)+(0,-0.8)$) -- (np.south);
+
+% Labels
+\node[label, above=0.3cm of llm] {研究内容一};
+\node[label, above=0.3cm of lean] {研究内容二};
+\node[label, above=0.3cm of rydberg] {研究内容三};
+
+% Background boxes
+\begin{scope}[on background layer]
+    \node[draw=llmcolor, fill=llmcolor!10, rounded corners, fit=(llm)(ilp)(evolve), inner sep=0.3cm] {};
+    \node[draw=verifycolor!80!black, fill=verifycolor!10, rounded corners, fit=(lean)(smt), inner sep=0.3cm] {};
+    \node[draw=hwcolor!80!black, fill=hwcolor!10, rounded corners, fit=(rydberg)(dwave)(tn), inner sep=0.3cm] {};
+\end{scope}
+
+% Legend for feedback
+\node[font=\footnotesize, text=red!70!black, below=3.5cm of dwave] {反馈优化方向};
+
+\end{tikzpicture}
+\end{document}
