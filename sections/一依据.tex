@@ -1,224 +1,193 @@
 
+\section{研究背景与战略意义}
+
+量子计算作为国家"十四五"规划的重点发展方向，正迎来从实验验证到实用化探索的关键转折期。近年来，多种物理计算平台取得了令人瞩目的突破：里德堡原子阵列已实现289量子比特的优化实验\cite{Ebadi2022Science}，D-Wave量子退火机突破5000量子比特规模\cite{DWave2025Science}，张量网络方法可在GPU上百秒内精确求解1024自旋晶格的基态\cite{Liu2021PRL}。这些进展表明，物理计算设备正逐步具备解决实际规模组合优化问题的能力。
+
+然而，物理计算平台的一个根本性挑战在于：\textbf{每种平台仅能原生处理特定类型的问题表示}。里德堡原子阵列天然适合求解单位圆盘图上的最大独立集(MIS)问题\cite{Nguyen2023PRXQuantum}，D-Wave退火机处理二次无约束二值优化(QUBO)问题，而张量网络方法的效率强烈依赖于问题的树宽结构。这意味着，将实际应用中的NP难问题有效映射到这些物理平台上，需要系统性的\textbf{问题规约(problem reduction)}技术作为桥梁。
+
+问题规约是计算复杂性理论的核心概念。自Cook和Karp奠基性工作以来，NP完全问题之间的多项式时间规约已成为算法设计的基本工具\cite{Lucas2014Frontiers}。但在物理计算时代，传统的理论规约往往不能直接使用——它们需要满足特定硬件的几何约束（如原子阵列的晶格结构）、连接性限制（如量子退火机的拓扑结构）以及可实现的资源开销。设计满足这些约束的高质量规约，需要深厚的复杂性理论功底和硬件专业知识，成为制约物理计算设备广泛应用的瓶颈。
+
+\textbf{大语言模型(LLM)的最新进展为解决这一难题开辟了新路径。}2025年，Google DeepMind发布的AlphaEvolve系统在50余个开放数学问题中改进了20\%的已知最优解，并打破了Strassen保持50年的4×4矩阵乘法记录\cite{AlphaEvolve2025}。这表明，LLM已具备发现创新性算法结构的能力。与此同时，LLM在组合优化求解、启发式算法设计和数学推理等方面也展现出强大潜力。本项目正是基于这一历史性机遇，探索\textbf{如何利用LLM自动化发现、验证和优化面向物理计算平台的问题规约}，从而加速量子计算和物理计算技术的实用化进程。
 
 
-免责声明：敬请大家仔细对比本模版与官方word转pdf后的差别，自行确定是否采用。
-如果采用博后的分阶段评审，限制只能用word，那么本项目就寿终正寝了。个人认为，2026年系统仍然上传PDF，只要人眼无法分辨与官方区别，就可以。
+\section{物理计算平台现状}
 
+\subsection{里德堡原子阵列}
 
-\textbf{只需要修改`sections`,`figures`,`ref.bib`，那么如果模版更新，只需要拷贝这三项过去直接编译，就是最新版。}
+里德堡原子阵列是当前最具潜力的量子优化平台之一。其核心机制是\textbf{里德堡阻塞效应}：当原子被激发至里德堡态时，强烈的范德瓦尔斯相互作用会阻止邻近原子同时被激发。这一物理特性天然对应于最大独立集(MIS)问题的约束条件——被选中的顶点不能相邻。因此，里德堡原子阵列可以直接编码单位圆盘图(unit-disk graph)上的MIS问题。
 
-\section{自定义设置方法}
-【常规】自定义设置方法
-
-\textbf{只需要修改`sections/个性化设置.sty`文件。}
-\begin{lstlisting}[language=tex, basicstyle=\ttfamily\small, keywordstyle=\color{blue}, commentstyle=\color{gray}]
-%【1】标题颜色
-\definecolor{HighLight}{RGB}{0,0,0}
-%【2】正文字体设置
-%\global\MS@kaitrue\global\MS@songfalse%楷体正文
-\global\MS@kaifalse\global\MS@songtrue%宋体正文
-%【3】是否屏蔽正文
-\global\MS@offtrue\global\MS@onfalse%屏蔽正文
-%\global\MS@ontrue\global\MS@offfalse%不屏蔽正文
-\end{lstlisting}
-
-【高阶】
-需要修改`nsfc.sty`文件中的定义。**如非必要，不建议修改。**
-
-\section{编译方法}
-\begin{enumerate}
-	\item 编译：XeLaTex->bibtex->XeLaTeX->XeLaTeX
-	\item 排错：多看编译错误，多查询错误解决方法；编译警告，只要不影响PDF，就不用管。本模版多人使用，可以认为不存在编译错误。
-\end{enumerate}
-
-
-\section{编辑方法}
-%%%%%%%%
-%\newpage
-\vspace{-5pt}
-
-\begin{figure}[h!]
-	\centering %图片居中
-	\includegraphics[width=6cm]{figures/xiugai.png}
-	\captionsetup{justification=centering} %图题居中
-	\caption{项目文件夹结构}
-\end{figure}
-只需要修改图中蓝色选中区域文件，即\verb|sections, figures, ref.bib|即可。其他剩余文件，可以直接采用模版替换，编译就是最新版。
-
-\subsubsection{章节}\label{subsubsec:t}
-
-\begin{itemize}
-	\item \verb|\label{subsubsect:t}|
-	引用章节\verb|\ref{subsubsec:t}|，生成为：\ref{subsubsec:t}。这个样式可能不是你想要的，那种情况下，就手敲吧！申请书不像论文，这种情况应该没几个。
-	\item 章节标题的话，如果编号、字体啥的不喜欢，也可以手动敲。示例如下：
-	
-	\noindent\textcolor{blue}{\textbf{1.1 测试}}
-	
-	其中，\verb|\noindent|标识没有首行缩进。要控制缩进距离，可以用\verb|\hspace{10pt}|手动缩进。缺点就是，不能自动编号，不能自动引用。但是，申请书不像论文，这种情况应该没几个。
+2022年，Ebadi等人在Science上发表的实验首次展示了里德堡平台的量子优化能力\cite{Ebadi2022Science}：
+\begin{itemize}[left=2em]
+    \item 实现了多达\textbf{289个量子比特}的优化实验
+    \item 在深电路区域观察到\textbf{超线性量子加速}
+    \item 问题难度可通过解的简并度和局部极小值结构控制
+    \item 使用张量网络算法精确表征MIS的简并性质
 \end{itemize}
 
-\subsubsection{字体}
-中文\textbf{粗体}；\textbf{bold} font；
-中文\textit{斜体}；\textit{italic} font；
+将任意图的MIS问题映射到里德堡平台需要设计\textbf{编码方案(encoding scheme)}。Nguyen等人提出的\textbf{国王子图(King's subgraph, KSG)编码}是一种通用方案\cite{Nguyen2023PRXQuantum}：它将任意图嵌入到正方晶格的国王子图中，实现了$O(n^2)$的渐进最优顶点开销。该方案的质量因子$Q = \sqrt{2}$，对应能量分离度$Q^6 = 8$。
 
-克制使用以下标注（不用更好），防止专家眼花缭乱。\textul{添加下划线}；\textull{添加双下划线}；\textuw{添加下弯线}；\textud{添加下点线}。
-
-全文改宋体，可以修改nsfc.sty的MS部分字体。
-
-可选的就是\verb|\zhkai,\enkai,\zhsong,\ensong|。
-
-\subsubsection{文献}
-普通引用\cite{test}；上标引用\citess{test}；多篇文章\citess{test,test2,test3}。
-
-有注音的英文：\cite{test}。
-
-参考期刊\cite{test}；
-参考图书\cite{test2}；
-参考会议\cite{test5}；
-参考链接\cite{test4}；
-参考文件\cite{test6}。
-
-对于中文参考文献，bib条目中需要有language = {zh}，参见\cite{test2}。
-
-对于非数字形式/作者年份形式的参考文献引用，阅读nsfc.sty对应这一部分进行修改：
-\begin{lstlisting}[language=tex, basicstyle=\ttfamily\small, keywordstyle=\color{blue}, commentstyle=\color{gray}]
-\usepackage[square,numbers,sort&compress]{natbib}%数字引用[1]
-\bibliographystyle{bibs/gbt7714-numerical}
-%\usepackage[round,sort]{natbib}%作者年引用Author(2022)
-%\bibliographystyle{bibs/gbt7714-author-year}
-%bst定制方法：修改对应.bst文件的FUNCTION {load.config}部分设置
-\end{lstlisting}
-
-要进一步定制bst的话，需要修改对应.bst文件的FUNCTION {load.config}部分设置。
-例如，如果需要设置是否要文献类型标识，可以修改bibs/gbt7714-numerical.bst文件或bibs/gbt7714-author-year.bst文件的以下部分：
-\begin{lstlisting}[language=tex, basicstyle=\ttfamily\small, keywordstyle=\color{blue}, commentstyle=\color{gray}]
-  #0 'show.mark := %【可修改】如果不想要[J][M]这种文献类型标识，改为#0；想要文献类型标识改为#1
-\end{lstlisting}
-
-\subsubsection{列表}
-无序列表\footnote{值得注意的是，不需要一定要用列表环境，用加粗、换行、缩进同样能达到效果。
-	因为咱们的初衷，还是LaTeX在排版文献和公式上有优势，发挥这一个优势就行了，其他部分不需要强行套用。文本本身还是最重要、需要大家投入精力的部分。}的例子：
-\begin{itemize}[left= 50pt]
-	\item[-] 第一条，第一条的内容可能很长长长长长长长长长长长长长长长长长长长长；
-	\item[-] 第二条。
+本项目组最新发展的\textbf{三角晶格子图(TLSG)编码}进一步提升了编码质量\cite{Pan2025Triangular}：
+\begin{itemize}[left=2em]
+    \item 质量因子$Q = \sqrt{3}$，能量分离度$Q^6 = 27$
+    \item 约束违规率较KSG编码\textbf{降低约两个数量级}
+    \item 使用整数线性规划自动搜索12顶点交叉小工具(crossing gadget)
+    \item 对于超过$3\mu s$的退火时间，违规率可控制在$10^{-4}$以下
 \end{itemize}
 
-有序列表的例子：
-\begin{enumerate}[left= 50pt]
-	\item 第一条，第一条的内容可能很长长长长长长长长长长长长长长长长长长长长；
-	\item 第二条。
-\end{enumerate}
+这一工作的关键创新在于将小工具设计问题形式化为整数规划，并通过自动化搜索替代人工设计。这正是本项目的前期探索——将这一思路推广到LLM辅助的全自动规约发现。
 
-两个带圈文字的实现方法：
-\textcircled{\raisebox{-0.8pt}{1}}
-\textcircled{\textbf{\small 1}}
+\subsection{D-Wave量子退火机}
 
-注意，由于列表的缩进，不同使用者可能偏向并不一样。本模版用的enumitem包，阅读他的文档进行个性化，其文档在：https://www.ctan.org/pkg/enumitem
+D-Wave量子退火机是目前商用化程度最高的量子计算平台，采用超导量子比特阵列实现量子退火过程。该平台原生求解\textbf{二次无约束二值优化(QUBO)}问题，即$\min_{\mathbf{x} \in \{0,1\}^n} \mathbf{x}^T Q \mathbf{x}$形式的目标函数。
 
-
-\subsubsection{公式}
-
-数学字体：
-\verb|\mathcal|：$\mathcal{XYZ},\mathcal{H}^T$，
-\verb|\mathbb|：$\mathbb{XYZ}$，
-\verb|\mathbf|：$\mathbf{XYZ}$，这个往往不加粗，需要用
-\verb|\symbf|：$\symbf{XYZ}$，
-\verb|\symbfit|：$\symbfit{XYZ}$
-
-\begin{itemize}
-	\item 标量/普通变量：$x,t$
-	\item 向量：$\symbfit{v}$；矩阵：$\symbfup{A}$
+2025年是D-Wave技术的里程碑年份\cite{DWave2025Science}：
+\begin{itemize}[left=2em]
+    \item \textbf{Advantage2原型机}展示了超过5000量子比特的规模
+    \item 在特定问题上首次实现相对于橡树岭Frontier超算的计算优势
+    \item 采用Zephyr拓扑结构，每个量子比特具有20路连接
+    \item 能量尺度提升40\%，相干时间显著延长
 \end{itemize}
 
-编号公式如下：（这个圆括号的内容只是为了方便看公式与文字的行间距）
-\begin{align}
-\begin{cases}
-a\\b
-\end{cases}
-\end{align}
-以及（这个圆括号的内容只是为了方便看公式与文字的行间距）
-\begin{equation}
-E = mC^2
-\end{equation}
-\begin{align}
-	\max_{x \in C} g(x).
-\end{align}
-不编号公式如下：（这个圆括号的内容只是为了方便看公式与文字的行间距）
-\begin{equation*}
-	\begin{cases}
-		a\\b
-	\end{cases}
-\end{equation*}
-\verb|$$x=y$$|类型公式：（半行间距）
+然而，D-Wave平台面临\textbf{次嵌入(minor embedding)}挑战。由于硬件拓扑的连接限制，完全连接的QUBO问题只能处理约180个逻辑变量。对于更大规模的问题，需要将单个逻辑变量映射到多个物理量子比特形成"链"，这会大幅增加资源开销并引入链断裂错误。
+
+一个完整的D-Wave求解流程为：
 $$
-	\begin{cases}
-		a\\b
-	\end{cases}
+\text{原始问题} \xrightarrow{\text{QUBO规约}} \text{QUBO表示} \xrightarrow{\text{次嵌入}} \text{硬件映射} \xrightarrow{\text{退火}} \text{解提取}
 $$
-公式的上下间距参见nsfc.sty中公式上下间距部分。
+其中QUBO规约这一步骤需要将约束条件转化为惩罚项，参数设置直接影响求解质量。这正是LLM可以发挥作用的关键环节。
+
+\subsection{张量网络方法}
+
+张量网络方法是连接量子物理和经典计算的重要桥梁，既可用于量子态模拟，也可直接求解组合优化问题。
+
+\textbf{热带张量网络}\cite{Liu2021PRL}是申请人团队的代表性工作。该方法将传统张量网络中的(加法,乘法)代数替换为(取大,加法)热带代数，使张量网络收缩过程直接计算基态能量：
+\begin{itemize}[left=2em]
+    \item 通过张量收缩精确求解自旋玻璃基态能量
+    \item 利用自动微分技术提取基态构型
+    \item 结合混合热带-普通代数实现解计数
+    \item 应用实例：1024自旋正方晶格、512量子比特D-Wave chimera图，均在单GPU上百秒内完成
+\end{itemize}
+
+张量网络方法的计算复杂度主要由\textbf{树宽(treewidth)}决定，收缩复杂度为$O(\exp(\text{tw}))$。这意味着高效的收缩顺序发现是实际应用的关键。
+
+2025年的最新进展进一步扩展了张量网络的应用范围：
+\begin{itemize}[left=2em]
+    \item \textbf{MeLoCoToN}：通过张量网络导出任意组合优化问题的显式解方程
+    \item \textbf{快速可行张量网络设计}：代数构造满足约束的张量网络，避免惩罚函数
+    \item 本团队的\textbf{CSP编程指南}\cite{Gao2025CSPGuide}：系统阐述了基于规约的约束满足问题求解框架
+\end{itemize}
 
 
+\section{问题规约的核心挑战}
+
+尽管物理计算平台发展迅速，将实际问题有效映射到这些平台仍面临三个核心挑战：
+
+\subsection{小工具设计的组合爆炸}
+
+问题规约的关键在于设计\textbf{小工具(gadget)}——用目标问题的基本结构编码源问题的约束。以三角晶格编码为例\cite{Pan2025Triangular}，寻找一个12顶点的交叉小工具需要在$4^{12} \approx 1600$万种构型中搜索最优解。申请人团队使用整数线性规划将这一搜索形式化，但随着小工具规模增大，组合爆炸问题依然严峻。
+
+传统的小工具设计依赖专家直觉和大量试错，即使是经验丰富的研究者也需要数周甚至数月时间。这种高度依赖人工的模式严重限制了新规约的发现速度。
+
+\subsection{形式化正确性验证的缺失}
+
+现有的问题规约大多缺乏形式化的正确性证明。一个正确的规约需要满足：
+\begin{itemize}[left=2em]
+    \item \textbf{完备性}：源问题的任意解都能从目标问题的解中提取
+    \item \textbf{健全性}：从目标问题解中提取的一定是源问题的有效解
+    \item \textbf{多项式开销}：规约后问题规模的增长是多项式级别的
+\end{itemize}
+
+在硬件约束下，还需验证编码后问题确实可在目标平台上实现。目前这些验证主要依赖人工推导，容易出错且难以复用。
+
+\subsection{硬件感知能力的缺乏}
+
+学术界发展的规约往往以渐进复杂度分析为主，忽略了实际硬件的关键约束：
+\begin{itemize}[left=2em]
+    \item \textbf{几何约束}：里德堡原子只能排列在特定晶格结构上
+    \item \textbf{拓扑约束}：D-Wave量子比特之间的连接由Pegasus/Zephyr图确定
+    \item \textbf{噪声模型}：实际设备存在退相干、读出错误等噪声源
+    \item \textbf{资源限制}：量子比特数量、相干时间等硬件资源有限
+\end{itemize}
+
+申请人团队开发的\textbf{problem-reductions}库\cite{ProblemReductions2025}正是为解决这些问题而设计。该Rust语言库旨在实现100+种NP难问题和规约规则，支持双向规约和解提取。但目前规约规则的实现仍依赖人工编写，且硬件特定的规约覆盖不足。
 
 
-\subsubsection{图}
-图片的例子：
-\begin{figure}[h!]
-\centering %图片居中
-\includegraphics[width=2cm]{figures/xiugai.png}
-\captionsetup{justification=centering} %图题居中
-\caption{这是图题This is caption}
-\end{figure}
+\section{LLM在算法发现领域的突破}
 
-图题和表头若想取消加粗，去掉nsfc.sty中caption部分的\verb|\bfseries|即可。
+\subsection{AlphaEvolve与算法优化}
+
+2025年，Google DeepMind发布的\textbf{AlphaEvolve}系统标志着LLM辅助算法发现进入新纪元\cite{AlphaEvolve2025}。该系统将Gemini大模型与进化算法结合，在50余个开放数学问题上进行了测试：
+\begin{itemize}[left=2em]
+    \item \textbf{20\%的问题}取得了超越已知最优解的新结果
+    \item 发现了\textbf{48次乘法}的4×4矩阵乘法算法，打破Strassen保持50年的记录(49次)
+    \item 在11维球面吻接数(kissing number)问题上建立了新的下界(593个球)
+    \item 优化了TPU硬件内核的性能
+\end{itemize}
+
+AlphaEvolve的核心范式对问题规约发现有直接启发：生成候选方案$\rightarrow$自动评估$\rightarrow$进化优化$\rightarrow$收敛到最优解。
+
+\subsection{LLM在组合优化中的应用}
+
+近期研究表明LLM可以直接参与组合优化求解：
+\begin{itemize}[left=2em]
+    \item \textbf{端到端CO求解器}：经过微调的7B参数模型在7类NP难问题上达到1-8\%的最优性差距，超越GPT-4o和领域特定启发式方法
+    \item \textbf{HeuriGym基准}：评估LLM在9类组合优化问题上的推理能力，顶尖模型(GPT-o4-mini, Gemini-2.5-Pro)展现了模仿和迭代改进启发式策略的能力
+    \item \textbf{HeurAgenix}：两阶段超启发式框架，首次实现无需外部求解器的LLM驱动多样化启发式进化
+    \item \textbf{Combinatorial Optimization for All}：让非专家用户通过LLM生成算法变体，实现对基线的改进
+\end{itemize}
+
+\subsection{数学推理能力的飞跃}
+
+LLM的数学推理能力正在迅速提升，为形式化验证提供了基础：
+\begin{itemize}[left=2em]
+    \item \textbf{rStar-Math}：结合蒙特卡洛树搜索与逐步推理，Qwen-7B在AIME 2024上达到53\%正确率
+    \item \textbf{Gemini Deep Think}：在2025年国际数学奥林匹克上达到金牌水平
+    \item \textbf{o1/o3推理模型}：在IMO问题上达到83\%准确率（GPT-4o仅为13\%）
+\end{itemize}
+
+这些能力可直接应用于：(1)证明规约规则的正确性；(2)在规约空间中搜索新方案；(3)针对硬件约束优化规约参数。
 
 
-\subsubsection{表}
-在表格内的第一行设置\verb|\zhkai\ensong\selectfont|，来选择字体。
+\section{本项目的科学问题与价值}
 
-其中\verb|\zhkai\zhsong\enkai\ensong|可以根据需要选择。
-\begin{table}[htbp]
-	\zhkai\ensong\selectfont%设置表格字体
-	\centering  % 显示位置为中间
-	\caption{表格}  % 表格标题
-	\label{table1}  % 用于索引表格的标签
-	%字母的个数对应列数，|代表分割线
-	% l代表左对齐，c代表居中，r代表右对齐
-	\begin{tabular}{|c|c|c|c|}  
-		\hline  % 表格的横线
-		& & & \\[-6pt]  %可以避免文字偏上来调整文字与上边界的距离
-		第一列&第二列&第三列&第四列 \\  % 表格中的内容，用&分开，\\表示下一行
-		\hline
-		& & & \\[-6pt]  %可以避免文字偏上 
-		0.1&0.2&0.3&0.4 \\
-		\hline
-	\end{tabular}
-\end{table}
+\subsection{核心科学问题}
 
-\subsubsection{定义定理等}
-\begin{definition}
-这是一个定义
-\end{definition}
-\begin{theorem}
-	这是一个定理
-\end{theorem}
+本项目聚焦于一个核心科学问题：\textbf{如何利用大语言模型自动发现、验证和优化面向物理计算平台的问题规约？}
 
-\section{某页最后一段行距可能很窄？}
-如果没有这个问题，就不用管这个事情。
+围绕这一核心问题，本项目将解决三个相互关联的子问题：
 
-行间距变化一般是在“多行蓝色模版”部分前后。因为蓝色模版文字在section里写的，latex把蓝色部分当作一个整体，可能硬要挤到这一页，而不是换新一页，导致会挤前一页的行间距，导致前一页行距异常。
-针对这种情况，模版已经使用
-\begin{lstlisting}[language=tex, basicstyle=\ttfamily\small, keywordstyle=\color{blue}, commentstyle=\color{gray}]
-	%自动段落的行间距微调
-	\usepackage{setspace}
-	\setstretch{1.6} % 22 bp / 14 pt = 1.571
-\end{lstlisting}
-降低了这种情况发生的可能。
-如果还有，就只好添加\verb|\newpage|把它newpage到后一页上，就行了。也可以考虑分段缓解，需要写的时候注意页面的分段和字数。
+\textbf{子问题1：规约的自动发现。}如何利用LLM的代码生成和推理能力，在给定源问题、目标问题和硬件约束的条件下，自动生成候选规约方案？这涉及如何将规约设计知识编码为LLM可理解的形式，以及如何引导LLM探索规约空间。
+
+\textbf{子问题2：规约的形式化验证。}如何利用LLM辅助生成规约正确性的形式化证明？这包括将规约性质转化为可验证的形式规范，以及与定理证明器(如Lean4)的集成。
+
+\textbf{子问题3：规约的硬件优化。}如何在满足正确性的前提下，优化规约的硬件资源开销和解的质量？这涉及多目标优化：最小化量子比特/顶点开销、最大化能量分离度、适应特定硬件的噪声模型。
+
+\subsection{科学价值}
+
+本项目的科学价值体现在以下三个层面：
+
+\textbf{方法论层面：}建立LLM辅助问题规约发现的系统性框架。该框架将AlphaEvolve范式与形式化方法结合，形成"生成-验证-优化"的闭环流程，为计算复杂性理论与AI的交叉研究提供新范式。
+
+\textbf{实践层面：}显著降低物理计算平台的使用门槛。目前只有同时具备复杂性理论和硬件专业知识的研究者才能有效利用这些平台。通过自动化规约发现，领域科学家无需深入了解硬件细节即可将其问题映射到量子或物理计算平台。
+
+\textbf{开源生态层面：}扩展problem-reductions库\cite{ProblemReductions2025}，形成包含100+种问题和规约规则的开源知识库。每条规约配备形式化验证和硬件适配信息，为学术界和产业界提供可复用的基础设施。
+
+\subsection{与申请人前期工作的关联}
+
+本项目是申请人十余年科研积累的自然延伸：
+\begin{itemize}[left=2em]
+    \item 热带张量网络\cite{Liu2021PRL}和泛型张量网络\cite{Liu2023SIAM}提供了组合优化的高效求解工具
+    \item 里德堡原子优化\cite{Ebadi2022Science,Nguyen2023PRXQuantum}建立了从理论到实验的完整链条
+    \item 三角晶格编码\cite{Pan2025Triangular}和分支规则发现\cite{Gao2024Branching}验证了自动化算法设计的可行性
+    \item Yao.jl\cite{Luo2020Quantum}等开源软件为框架实现提供了技术基础
+\end{itemize}
+
+这些工作使申请人团队具备将LLM与物理计算深度融合的独特优势。
 
 \begin{REF}
 \subsection*{参考文献}
 \vspace{-50pt}
-\bibliography{ref}%参考文献
+\bibliography{ref}
 \end{REF}
 
-\newpage%自己判断是否需要
+\newpage
