@@ -17,3 +17,10 @@
 ⚠︎*
 ⚠︎*/
 .DS_Store
+
+# Python venv
+.venv/
+
+# Generated markdown from references
+references/bibliography.md
+.tmp_bib.md
