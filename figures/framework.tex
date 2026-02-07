@@ -5,79 +5,85 @@
 
 \setCJKmainfont{STKaiti}
 
-\definecolor{llmcolor}{RGB}{100,149,237}      % Cornflower blue
-\definecolor{verifycolor}{RGB}{144,238,144}   % Light green
-\definecolor{hwcolor}{RGB}{255,182,108}       % Light orange
-\definecolor{inputcolor}{RGB}{200,200,200}    % Light gray
-\definecolor{outputcolor}{RGB}{255,218,185}   % Peach
+\definecolor{theorycolor}{RGB}{147,112,219}    % Medium purple
+\definecolor{methodcolor}{RGB}{100,149,237}    % Cornflower blue
+\definecolor{systemcolor}{RGB}{144,238,144}    % Light green
+\definecolor{validcolor}{RGB}{255,182,108}     % Light orange
+\definecolor{inputcolor}{RGB}{200,200,200}     % Light gray
+\definecolor{outputcolor}{RGB}{255,218,185}    % Peach
 
 \begin{document}
 \begin{tikzpicture}[
-    node distance=1.2cm and 1.5cm,
-    box/.style={rectangle, rounded corners, draw, minimum width=2.8cm, minimum height=1cm, align=center, font=\small},
+    node distance=1cm and 1.2cm,
+    box/.style={rectangle, rounded corners, draw, minimum width=2.6cm, minimum height=0.9cm, align=center, font=\small},
     inputbox/.style={box, fill=inputcolor},
-    llmbox/.style={box, fill=llmcolor!40},
-    verifybox/.style={box, fill=verifycolor!60},
-    hwbox/.style={box, fill=hwcolor!70},
+    theorybox/.style={box, fill=theorycolor!40},
+    methodbox/.style={box, fill=methodcolor!40},
+    systembox/.style={box, fill=systemcolor!60},
+    validbox/.style={box, fill=validcolor!70},
     outputbox/.style={box, fill=outputcolor},
     arrow/.style={-{Stealth[length=2mm]}, thick},
     dasharrow/.style={-{Stealth[length=2mm]}, thick, dashed},
     label/.style={font=\footnotesize\bfseries},
 ]
 
-% Input layer
-\node[inputbox] (np) {NP困难问题\\SAT, TSP, MIS, ...};
+% Input - User Problem
+\node[inputbox] (input) {用户问题\\NP困难问题实例};
 
-% LLM Discovery layer (研究内容一)
-\node[llmbox, right=2cm of np] (llm) {LLM候选生成\\知识库 + 提示工程};
-\node[llmbox, below=0.8cm of llm] (ilp) {ILP验证\\整数线性规划};
-\node[llmbox, below=0.8cm of ilp] (evolve) {进化优化\\AlphaEvolve式迭代};
+% Central System - Compiler (研究内容三)
+\node[systembox, right=3cm of input, minimum width=3.5cm, minimum height=2.5cm] (compiler) {问题规约编译器};
+\node[font=\tiny, below=0.1cm of compiler.north] {路径规划 + 规约执行};
 
-% Verification layer (研究内容二)
-\node[verifybox, right=2cm of llm] (lean) {Lean4证明\\形式化验证};
-\node[verifybox, below=0.8cm of lean] (smt) {SMT验证\\Z3穷举检验};
+% Theory layer (研究内容一) - above compiler
+\node[theorybox, above=1.5cm of compiler] (theory) {代价模型理论};
+\node[theorybox, right=0.8cm of theory] (pareto) {路径优化算法};
 
-% Hardware optimization layer (研究内容三)
-\node[hwbox, right=2cm of lean] (rydberg) {里德堡原子\\质量因子优化};
-\node[hwbox, below=0.8cm of rydberg] (dwave) {D-Wave\\嵌入优化};
-\node[hwbox, below=0.8cm of dwave] (tn) {张量网络\\树宽优化};
+% Method layer (研究内容二) - left of compiler
+\node[methodbox, below=1.5cm of input] (llm) {LLM生成};
+\node[methodbox, right=0.8cm of llm] (verify) {ILP/SMT验证};
+\node[methodbox, right=0.8cm of verify] (rules) {规约知识库\\(100+规则)};
 
-% Output layer
-\node[outputbox, right=2cm of dwave] (output) {优化解\\实验验证};
+% Validation layer (研究内容四) - right of compiler
+\node[validbox, right=2.5cm of compiler] (rydberg) {里德堡原子阵列};
+\node[validbox, below=0.6cm of rydberg] (dwave) {D-Wave退火机};
+
+% Output
+\node[outputbox, right=1.5cm of dwave] (output) {优化解};
 
 % Arrows - main flow
-\draw[arrow] (np) -- (llm);
-\draw[arrow] (llm) -- (ilp);
-\draw[arrow] (ilp) -- (evolve);
-\draw[arrow] (evolve.east) -- ++(0.5,0) |- (llm.south west);
-
-\draw[arrow] (ilp.east) -- (smt.west);
-\draw[arrow] (llm.east) -- (lean.west);
-
-\draw[arrow] (lean.east) -- (rydberg.west);
-\draw[arrow] (smt.east) -- (dwave.west);
-
-\draw[arrow] (rydberg.east) -- ++(0.5,0) |- (output.north west);
+\draw[arrow] (input) -- node[above, font=\tiny] {问题实例} (compiler);
+\draw[arrow] (compiler) -- node[above, font=\tiny] {硬件映射} (rydberg);
+\draw[arrow] (compiler) -- (dwave);
+\draw[arrow] (rydberg) -- (output);
 \draw[arrow] (dwave) -- (output);
-\draw[arrow] (tn.east) -- ++(0.5,0) |- (output.south west);
 
-% Feedback arrow
-\draw[dasharrow, color=red!70!black] (output.south) -- ++(0,-0.8) -| ($(np.south)+(0,-0.8)$) -- (np.south);
+% Theory to compiler
+\draw[arrow] (theory) -- node[left, font=\tiny] {最优路径} (compiler);
+\draw[arrow] (pareto) -- (compiler);
+
+% Rules to compiler
+\draw[arrow] (rules) -- node[right, font=\tiny] {规约规则} (compiler);
+
+% LLM pipeline
+\draw[arrow] (llm) -- (verify);
+\draw[arrow] (verify) -- (rules);
+
+% Feedback
+\draw[dasharrow, color=red!70!black] (output.south) -- ++(0,-0.5) -| node[below, pos=0.25, font=\tiny, text=red!70!black] {实验反馈} (llm.south);
 
 % Labels
-\node[label, above=0.3cm of llm] {研究内容一};
-\node[label, above=0.3cm of lean] {研究内容二};
-\node[label, above=0.3cm of rydberg] {研究内容三};
+\node[label, above=0.1cm of theory.north west, anchor=south west, text=theorycolor!80!black] {研究内容一：理论基础};
+\node[label, left=0.1cm of llm.west, anchor=east, text=methodcolor!80!black] {研究内容二：方法创新};
+\node[label, above=0.1cm of compiler.north, anchor=south, text=systemcolor!80!black] {研究内容三：系统构建};
+\node[label, above=0.1cm of rydberg.north, anchor=south, text=validcolor!80!black] {研究内容四：实验验证};
 
 % Background boxes
 \begin{scope}[on background layer]
-    \node[draw=llmcolor, fill=llmcolor!10, rounded corners, fit=(llm)(ilp)(evolve), inner sep=0.3cm] {};
-    \node[draw=verifycolor!80!black, fill=verifycolor!10, rounded corners, fit=(lean)(smt), inner sep=0.3cm] {};
-    \node[draw=hwcolor!80!black, fill=hwcolor!10, rounded corners, fit=(rydberg)(dwave)(tn), inner sep=0.3cm] {};
+    \node[draw=theorycolor!80!black, fill=theorycolor!10, rounded corners, fit=(theory)(pareto), inner sep=0.25cm] {};
+    \node[draw=methodcolor!80!black, fill=methodcolor!10, rounded corners, fit=(llm)(verify)(rules), inner sep=0.25cm] {};
+    \node[draw=systemcolor!80!black, fill=systemcolor!10, rounded corners, fit=(compiler), inner sep=0.15cm] {};
+    \node[draw=validcolor!80!black, fill=validcolor!10, rounded corners, fit=(rydberg)(dwave), inner sep=0.25cm] {};
 \end{scope}
-
-% Legend for feedback
-\node[font=\footnotesize, text=red!70!black, below=3.5cm of dwave] {反馈优化方向};
 
 \end{tikzpicture}
 \end{document}

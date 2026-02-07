@@ -1,425 +1,284 @@
 
 \section{总体研究框架}
 
-本项目围绕"LLM辅助面向物理计算平台的问题规约自动发现与验证"这一核心目标，构建包含三个紧密关联的研究方向的系统性框架，如图\ref{fig:framework}所示。
+本项目围绕"面向量子优化平台的问题规约编译器"这一核心目标，构建包含四个紧密关联的研究方向的系统性框架，如图\ref{fig:framework}所示。
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=0.85\textwidth]{framework.pdf}
 	\captionsetup{justification=centering}
-	\caption{总体研究框架：LLM辅助问题规约自动发现与验证}
+	\caption{总体研究框架：问题规约编译器的理论、方法与系统}
 	\label{fig:framework}
 \end{figure}
 
-三个研究方向形成"发现$\rightarrow$验证$\rightarrow$优化$\rightarrow$实验验证$\rightarrow$反馈"的闭环：
+四个研究方向形成从理论到系统的完整链条：
 
-\textbf{研究内容一：LLM辅助规约小工具自动发现。}利用大语言模型的代码生成与推理能力，结合整数线性规划验证，在给定源问题、目标问题和约束条件下自动生成候选规约方案。采用AlphaEvolve式的进化优化策略，通过"LLM生成$\rightarrow$ILP验证$\rightarrow$优胜选择$\rightarrow$变异进化"的迭代过程，高效探索规约设计空间。
+\textbf{研究内容一：规约代价模型与路径优化。}建立规约编译的理论基础，将规约选择形式化为多项式代价图上的路径优化问题，研究最优路径的判定条件和搜索算法。
 
-\textbf{研究内容二：规约正确性形式化验证。}为保证规约的可靠性，研究LLM辅助的形式化证明生成技术。将规约正确性性质（解保持性与解可提取性）转化为可机器验证的形式规范，与Lean4/mathlib定理证明器集成，并利用SMT求解器处理小规模实例验证。
+\textbf{研究内容二：LLM驱动的规模化规约发现。}提出测试先行的规约发现方法，利用大语言模型自动生成候选规约，结合ILP/SMT进行正确性验证，实现100+规约规则的规模化发现。
 
-\textbf{研究内容三：硬件感知规约优化。}针对里德堡原子阵列、D-Wave量子退火机、张量网络三类典型物理计算平台，研究在满足正确性前提下最小化硬件资源开销、最大化解质量的优化策略。开发平台特定的优化模块，并与合作者开展实验验证。
+\textbf{研究内容三：问题规约编译器设计与实现。}构建编译器系统，集成规约知识库、路径规划器和后端代码生成器，实现从用户问题到量子硬件的端到端自动映射。
 
-这三个研究方向相互支撑：研究内容一提供候选规约，研究内容二验证其正确性，研究内容三优化其硬件效率；同时，硬件实验的反馈将指导规约发现的方向，验证结果将筛选出高质量规约进入优化流程。这一闭环机制确保产出的规约既有理论保证，又有实用价值。
+\textbf{研究内容四：量子优化平台实验验证。}在里德堡原子阵列和D-Wave量子退火机上验证编译器生成的规约，评估实际求解效果。
+
+这四个方向相互支撑：理论研究（一）为编译器的路径选择提供算法基础；方法研究（二）为编译器提供规约知识库；系统研究（三）将理论和方法集成为可用工具；实验验证（四）检验系统的实际效果并提供反馈。
 
 
-\section{研究内容一：LLM辅助规约小工具自动发现}
+\section{研究内容一：规约代价模型与路径优化}
 
-\subsection{问题定义}
+\subsection{研究目标}
 
-问题规约的核心在于设计\textbf{小工具(gadget)}——用目标问题的基本结构编码源问题的约束条件。以里德堡原子阵列为例，将任意图的最大独立集(MIS)问题映射到单位圆盘图需要设计交叉小工具(crossing gadget)来处理边的交叉\cite{Nguyen2023PRXQuantum,Pan2025Triangular}。
+传统编译器将高级语言转换为机器码时，需要在多种等价代码序列中选择代价最低的方案。问题规约编译器面临类似挑战：将用户问题"编译"到量子硬件时，需要在多条规约路径中自动选择最优方案。本研究的目标是建立规约路径优化的理论基础。
 
-形式化地，小工具设计问题的输入包括：
-\begin{itemize}[left=2em]
-	\item \textbf{源问题}$P_s$：需要求解的原始组合优化问题（如任意图MIS）
-	\item \textbf{目标问题}$P_t$：物理计算平台原生支持的问题（如单位圆盘图MIS）
-	\item \textbf{约束条件}$\mathcal{C}$：硬件施加的几何、拓扑或资源限制（如三角晶格结构）
-\end{itemize}
+\subsection{代价模型}
 
-输出为一个\textbf{最小开销小工具}$G^*$，满足：
+与经典编译器的常数代价模型不同，规约代价是\textbf{问题规模的函数}。设问题$P$的规模由参数向量$\mathbf{n} = (n_1, n_2, \ldots)$描述，规约$r: P_i \to P_j$的代价可表示为多变量多项式：
 \begin{equation}
-	G^* = \arg\min_{G \in \mathcal{G}} \text{cost}(G) \quad \text{s.t.} \quad \text{correct}(G, P_s, P_t) \wedge \text{satisfy}(G, \mathcal{C})
+	\text{cost}_r(\mathbf{n}) = \sum_{k} c_k \cdot n_1^{a_{k1}} n_2^{a_{k2}} \cdots
 \end{equation}
-其中$\mathcal{G}$为候选小工具空间，$\text{cost}(G)$衡量资源开销（如顶点数），$\text{correct}$验证规约正确性，$\text{satisfy}$检查约束满足性。
 
-以三角晶格编码为例\cite{Pan2025Triangular}，一个交叉小工具需满足：两条穿过小工具的"逻辑线"保持独立，即一条线上选中顶点不影响另一条线的可选状态。这需要在晶格约束下精心设计顶点位置和权重分配。
+例如，将$n$顶点、$m$边的图规约到三角晶格MIS，开销为$O(n^2 + m)$；3-SAT到MIS的规约，开销正比于子句数$m$。
+
+\subsection{路径优化问题}
+
+将规约空间建模为有向图$G = (V, E)$，其中顶点$V$为问题类型，边$E$为规约规则。给定源问题$P_s$和目标问题$P_t$，最优路径问题为：
+\begin{equation}
+	\pi^* = \arg\min_{\pi \in \text{Paths}(P_s, P_t)} \text{TotalCost}(\pi, \mathbf{n})
+\end{equation}
+
+\textbf{核心理论问题}：
+
+\textbf{问题1：代价比较。}给定两条路径的代价多项式$f(\mathbf{n})$和$g(\mathbf{n})$，判定是否存在$\mathbf{n}_0$使得对所有$\mathbf{n} > \mathbf{n}_0$有$f(\mathbf{n}) < g(\mathbf{n})$。这涉及多变量多项式的渐进比较理论。
+
+\textbf{问题2：Pareto最优。}当不存在全局最优路径时（即不同规模范围内最优路径不同），需要计算Pareto前沿——在各规模范围内分别最优的路径集合。
+
+\textbf{问题3：高效搜索。}规约图可能包含100+节点和数百条边，需要开发高效的路径枚举和剪枝算法。
 
 \subsection{技术路线}
 
-\subsubsection{LLM候选生成}
+\textbf{渐进分析框架：}借鉴计算复杂性理论中的渐进分析方法，建立多项式代价的偏序关系。对于单变量情形，利用主项比较；对于多变量情形，研究不同变量增长率假设下的比较策略。
 
-利用大语言模型的代码生成与推理能力自动生成候选小工具。关键技术包括：
+\textbf{Pareto前沿计算：}开发增量式算法维护Pareto最优路径集合。当规约图更新时（新增规约规则），高效更新前沿而无需重新计算。
 
-\textbf{知识编码与提示工程。}将问题规约的领域知识编码为LLM可理解的形式：
-\begin{itemize}[left=2em]
-	\item 构建包含已知小工具设计的知识库，提供结构化的设计模式描述
-	\item 设计针对规约发现的专用提示模板，明确指定输入输出格式
-	\item 利用链式思维(Chain-of-Thought)引导LLM逐步推理小工具的设计逻辑
+\textbf{启发式加速：}对于大规模规约图，开发基于问题结构的启发式剪枝策略，在保证解质量的前提下加速搜索。
+
+\subsection{预期成果}
+
+\textbf{理论成果：}建立规约路径优化的形式化框架，给出代价比较的可判定性条件，设计Pareto前沿的计算算法。
+
+\textbf{算法实现：}开发路径优化算法库，作为编译器的核心模块，支持多种代价模型和搜索策略。
+
+
+\section{研究内容二：LLM驱动的规模化规约发现}
+
+\subsection{研究目标}
+
+构建覆盖主流NP难问题的规约知识库需要发现和验证上百条规约规则。传统人工方法每条规约需要数周至数月，无法满足规模化需求。本研究提出\textbf{LLM驱动的测试先行开发方法}，将规约发现从"专家手工设计"转变为"人机协作的自动化流水线"。
+
+\subsection{测试先行的规约发现}
+
+借鉴软件工程中的测试驱动开发(TDD)理念，申请人提出规约发现的测试先行方法：
+
+\textbf{步骤1：规范定义。}首先形式化定义规约的接口规范，包括：
+\begin{itemize}
+	\item 输入问题类型$P_s$和输出问题类型$P_t$的形式定义
+	\item 规约映射$\phi: \text{Instance}(P_s) \to \text{Instance}(P_t)$的类型签名
+	\item 解提取映射$\psi: \text{Sol}(P_t) \to \text{Sol}(P_s)$的类型签名
+	\item 正确性性质的形式化陈述
 \end{itemize}
 
-\textbf{少样本学习。}利用现有高质量小工具作为示例：
-\begin{itemize}[left=2em]
-	\item 从KSG编码\cite{Nguyen2023PRXQuantum}和TLSG编码\cite{Pan2025Triangular}中提取典型设计模式
-	\item 构建"问题描述$\rightarrow$小工具设计$\rightarrow$正确性论证"的示例链
-	\item 通过上下文学习让LLM理解小工具设计的核心原则
+\textbf{步骤2：测试套件构建。}在LLM生成规约之前，先构建验证正确性的测试套件：
+\begin{itemize}
+	\item 小规模穷举测试：对所有小规模实例验证解保持性和解可提取性
+	\item 随机测试：生成大量随机实例进行统计验证
+	\item 边界测试：针对特殊结构（空图、完全图、稀疏图等）的测试用例
 \end{itemize}
 
-\textbf{多模态输入。}结合图形化表示增强LLM理解：
-\begin{itemize}[left=2em]
-	\item 将晶格结构、小工具图形以结构化文本或图像形式输入
-	\item 利用视觉语言模型理解几何约束
-	\item 支持从草图到代码的转换
-\end{itemize}
+\textbf{步骤3：LLM生成与迭代。}向大语言模型提供规范定义和测试套件，由LLM生成候选规约代码。测试失败时，将失败用例反馈给LLM进行迭代修正。
 
-\subsubsection{整数线性规划验证}
+\textbf{步骤4：形式化验证。}对通过测试的规约，使用ILP或SMT求解器进行严格验证，确保正确性证明而非仅依赖测试覆盖。
+
+\subsection{LLM提示工程}
+
+有效的提示设计是LLM生成高质量规约的关键：
+
+\textbf{知识编码：}将现有规约设计知识（如KSG编码\cite{Nguyen2023PRXQuantum}、TLSG编码\cite{Pan2025Triangular}）编码为结构化示例，包括设计动机、核心技巧、正确性论证。
+
+\textbf{链式思维：}引导LLM逐步推理规约设计，从"需要编码什么约束"到"如何用目标问题结构表达"再到"如何保证正确性"。
+
+\textbf{多模态输入：}对于几何约束（如晶格结构），探索将图形表示与文本描述结合的多模态提示方法。
+
+\subsection{ILP/SMT验证框架}
 
 申请人团队在三角晶格编码工作中\cite{Pan2025Triangular}首次将小工具验证形式化为整数线性规划(ILP)问题。本项目将扩展这一方法：
 
-\textbf{ILP形式化框架。}给定候选小工具$G$，构造如下ILP：
-\begin{itemize}[left=2em]
-	\item \textbf{决策变量}：每个晶格位置的顶点占用状态$x_i \in \{0,1\}$
-	\item \textbf{独立集约束}：相邻顶点不能同时选中，$x_i + x_j \leq 1$, $\forall (i,j) \in E$
-	\item \textbf{逻辑线约束}：编码源问题约束的传递性条件
-	\item \textbf{目标函数}：最小化顶点总数或最大化质量因子
-\end{itemize}
+\textbf{ILP验证：}对于基于晶格结构的规约，构造ILP模型验证解保持性和解可提取性。决策变量为晶格位置的占用状态，约束条件编码独立集性质和逻辑线传递条件。
 
-\textbf{正确性验证。}通过求解ILP检验小工具的关键性质：
-\begin{itemize}[left=2em]
-	\item \textbf{解保持性}：源问题的任意解都对应目标问题的有效解
-	\item \textbf{解可提取性}：从目标问题的最优解可唯一确定源问题的解
-	\item \textbf{开销界}：验证资源开销在可接受范围内
-\end{itemize}
+\textbf{SMT验证：}对于更一般的规约，使用SMT求解器（如Z3）编码一阶逻辑性质。SMT特别适合验证规约的组合性质和边界情形。
 
-这一ILP框架已在12顶点交叉小工具搜索中验证了有效性，本项目将扩展至更大规模和更多类型的小工具。
+\textbf{反例驱动改进：}当验证失败时，求解器生成具体反例，这些反例可反馈给LLM指导规约设计的修正。
 
-\subsubsection{进化式优化}
+\subsection{进化式优化}
 
-借鉴AlphaEvolve的成功经验\cite{AlphaEvolve2025}，采用LLM驱动的进化优化策略：
+借鉴AlphaEvolve\cite{AlphaEvolve2025}的成功经验，对已验证规约进行进化优化：
 
-\textbf{进化循环设计：}
-\begin{enumerate}[left=2em]
-	\item \textbf{初始化}：LLM基于知识库生成初始候选小工具种群
-	\item \textbf{评估}：使用ILP验证每个候选的正确性，计算适应度（开销、质量因子）
-	\item \textbf{选择}：保留通过验证且适应度高的候选
-	\item \textbf{变异}：LLM基于当前最优候选生成变异版本
-	\item \textbf{迭代}：重复评估-选择-变异直到收敛
-\end{enumerate}
+\textbf{进化循环：}初始化（LLM生成种群）$\to$ 评估（ILP验证+代价计算）$\to$ 选择（保留高质量候选）$\to$ 变异（LLM生成变体）$\to$ 迭代。
 
-\textbf{关键优化策略：}
-\begin{itemize}[left=2em]
-	\item \textbf{多目标优化}：同时优化多个指标（顶点数、质量因子、对称性）
-	\item \textbf{约束松弛}：对难以满足的硬约束采用渐进式松弛策略
-	\item \textbf{经验回放}：维护历史最优解库，避免重复探索
-	\item \textbf{局部搜索}：对有潜力的候选进行精细化局部优化
-\end{itemize}
+\textbf{多目标优化：}同时优化多个指标，包括资源开销、质量因子（针对里德堡编码）、代码复杂度等。
 
-\textbf{与AlphaEvolve的区别与创新：}AlphaEvolve主要应用于数学问题的数值优化，而本项目针对的是离散的组合结构设计。关键创新在于将ILP求解器作为精确验证器嵌入进化循环，确保产出的小工具具有可证明的正确性，而非仅依赖经验测试。
+\textbf{与AlphaEvolve的关键区别：}AlphaEvolve主要应用于数值优化，而本项目针对离散组合结构。关键创新在于将ILP/SMT求解器作为精确验证器嵌入进化循环，确保产出规约的可证明正确性。
 
 \subsection{预期成果}
 
-\textbf{LLM-ILP混合系统：}开发一套完整的规约发现工具链，集成LLM候选生成、ILP正确性验证和进化优化三个模块。该系统将作为开源软件发布，支持多种LLM后端（GPT-4、Claude、Gemini等）。
+\textbf{规约知识库：}项目周期内完成100+规约规则的发现与验证，覆盖主流NP难问题（MIS、SAT、MAX-CUT、图着色、集合覆盖等）到量子优化原生问题（单位圆盘图MIS、QUBO）的映射。
 
-\textbf{新发现的小工具：}预期在项目周期内发现\textbf{5-10种新型高质量小工具}，覆盖：
-\begin{itemize}[left=2em]
-	\item 三角晶格上的多种交叉小工具变体（不同开销-质量权衡）
-	\item 正方晶格上的改进KSG编码组件
-	\item D-Wave Pegasus/Zephyr拓扑上的嵌入小工具
-	\item 张量网络收缩的优化分解模式
+\textbf{方法论贡献：}建立LLM驱动的测试先行规约发现方法论，为AI辅助算法发现提供新范式。
+
+\textbf{开源工具：}发布规约发现工具链，支持多种LLM后端（GPT-4、Claude、Gemini等），集成ILP/SMT验证。
+
+
+\section{研究内容三：问题规约编译器设计与实现}
+
+\subsection{系统定位}
+
+本项目的核心产出是一个\textbf{开源问题规约编译器}，为量子优化平台的使用者提供"一键映射"服务。用户只需指定：
+\begin{itemize}
+	\item \textbf{输入}：待求解的组合优化问题实例
+	\item \textbf{目标}：量子硬件平台（里德堡原子阵列或D-Wave退火机）
 \end{itemize}
 
-\textbf{效率提升：}将小工具设计时间从人工的\textbf{数周至数月缩短为数小时至数天}。对于规模适中的小工具（$\leq 20$顶点），实现全自动发现；对于更大规模，提供人机协作模式。
+编译器自动完成：问题识别 $\to$ 路径规划 $\to$ 逐步规约 $\to$ 硬件映射代码生成。
 
+\subsection{系统架构}
 
-\section{研究内容二：规约正确性形式化验证}
+编译器由四个核心模块组成：
 
-\subsection{挑战与目标}
-
-问题规约的正确性是其实用价值的根本保证。一个正确的规约需要满足两个核心性质：
-
-\textbf{解保持性(Soundness)：}源问题$P_s$的任意可行解$s$都能通过规约映射$\phi$转化为目标问题$P_t$的可行解$\phi(s)$，且目标函数值保持相应关系。形式化地：
-\begin{equation}
-	\forall s \in \text{Sol}(P_s): \phi(s) \in \text{Sol}(P_t) \wedge f_t(\phi(s)) = g(f_s(s))
-\end{equation}
-其中$f_s, f_t$分别为源问题和目标问题的目标函数，$g$为值映射函数。
-
-\textbf{解可提取性(Completeness)：}从目标问题$P_t$的最优解$t^*$可以唯一确定源问题$P_s$的最优解$\psi(t^*)$。形式化地：
-\begin{equation}
-	\forall t^* \in \text{Opt}(P_t): \psi(t^*) \in \text{Opt}(P_s)
-\end{equation}
-其中$\psi$为解提取映射，$\text{Opt}$表示最优解集合。
-
-当前规约正确性验证面临的主要挑战包括：
-\begin{itemize}[left=2em]
-	\item 人工证明容易出错，且难以复用和扩展
-	\item 缺乏统一的形式化框架和自动化工具支持
-	\item LLM生成的规约尤其需要可靠的验证机制
+\textbf{模块1：规约知识库。}存储研究内容二发现的100+规约规则，每条规则包含：
+\begin{itemize}
+	\item 规约映射$\phi$和解提取映射$\psi$的可执行实现
+	\item 代价多项式的精确表达式
+	\item 正确性验证的证据（ILP/SMT验证结果或形式化证明）
+	\item 适用的硬件后端标注
 \end{itemize}
 
-本研究的目标是建立一套\textbf{可扩展、可复用、机器可验证}的规约正确性验证框架。
-
-\subsection{技术路线}
-
-\subsubsection{LLM辅助证明草稿生成}
-
-利用LLM的数学推理能力辅助生成正确性证明的初步框架：
-
-\textbf{证明模板库构建：}
-\begin{itemize}[left=2em]
-	\item 分析经典NP完全性证明\cite{Lucas2014Frontiers}的结构模式
-	\item 提取常用证明技巧：归纳、反证、构造性证明等
-	\item 针对不同类型规约设计专用证明模板
+\textbf{模块2：路径规划器。}基于研究内容一的理论，实现最优规约路径搜索：
+\begin{itemize}
+	\item 输入用户问题类型和目标平台
+	\item 查询规约图，计算可行路径
+	\item 根据问题规模参数，选择最优路径或呈现Pareto前沿供用户选择
 \end{itemize}
 
-\textbf{LLM证明生成：}
-\begin{itemize}[left=2em]
-	\item 输入规约定义和目标性质，LLM生成自然语言证明草稿
-	\item 利用链式思维逐步展开证明论证
-	\item 生成多个候选证明路径供后续验证
+\textbf{模块3：规约执行器。}沿选定路径逐步应用规约规则：
+\begin{itemize}
+	\item 管理中间问题实例的表示转换
+	\item 记录每步规约的映射关系，以便最终解提取
+	\item 支持中间结果的缓存和复用
 \end{itemize}
 
-\textbf{证明精炼迭代：}
-\begin{itemize}[left=2em]
-	\item 根据验证器反馈修正证明中的错误或缺口
-	\item 逐步细化证明细节直至通过形式化验证
-	\item 记录成功证明策略以指导后续生成
+\textbf{模块4：后端代码生成器。}针对目标平台生成可执行输入：
+\begin{itemize}
+	\item \textbf{里德堡后端}：生成原子坐标文件，兼容QuEra Bloqade等控制软件
+	\item \textbf{D-Wave后端}：生成QUBO矩阵和嵌入方案，兼容Ocean SDK
 \end{itemize}
 
-\subsubsection{与Lean4/mathlib集成}
+\subsection{关键技术}
 
-将LLM生成的证明草稿转化为机器可验证的形式化证明：
+\textbf{问题识别：}自动识别用户输入问题的类型和结构参数。对于标准格式（如DIMACS CNF、DIMACS图格式），直接解析；对于自定义格式，提供问题描述DSL。
 
-\textbf{Lean4规约语言设计：}
-\begin{itemize}[left=2em]
-	\item 在Lean4中定义问题规约的基本概念：问题、解、规约映射
-	\item 形式化解保持性和解可提取性的定义
-	\item 利用mathlib库中的组合学和图论基础设施
+\textbf{增量编译：}当规约知识库更新时，支持增量重编译而无需从头计算，提高迭代开发效率。
+
+\textbf{解的反向提取：}编译器不仅完成问题映射，还支持从硬件求解结果反向提取原问题的解。沿规约路径逆向应用解提取映射$\psi$。
+
+\subsection{硬件后端优化}
+
+\textbf{里德堡原子阵列：}
+\begin{itemize}
+	\item 支持多种晶格结构（正方、三角、蜂窝），自动选择最优编码
+	\item 质量因子$Q$优化，最大化能量分离度
+	\item 适配QuEra等公司的硬件参数（原子数上限、阻塞半径）
+	\item 利用申请人开发的UnitDiskMapping.jl库进行编码优化
 \end{itemize}
 
-\textbf{证明翻译器开发：}
-\begin{itemize}[left=2em]
-	\item 构建从自然语言证明到Lean4策略(tactic)的翻译规则
-	\item 利用LLM作为翻译引擎，将证明步骤映射到Lean4命令
-	\item 开发交互式证明辅助工具，支持人工介入关键步骤
-\end{itemize}
-
-\textbf{证明自动化：}
-\begin{itemize}[left=2em]
-	\item 对于常见证明模式，开发专用Lean4策略自动完成
-	\item 集成自动定理证明器(如aesop)处理例行推理
-	\item 构建规约证明的策略库(tactic library)
-\end{itemize}
-
-\subsubsection{SMT求解器验证}
-
-对于小规模实例，使用SMT求解器(如Z3)进行穷举验证：
-
-\textbf{SMT编码：}
-\begin{itemize}[left=2em]
-	\item 将规约正确性性质编码为一阶逻辑公式
-	\item 通过枚举所有可能输入验证解保持性
-	\item 验证解提取映射的唯一性和正确性
-\end{itemize}
-
-\textbf{适用场景：}
-\begin{itemize}[left=2em]
-	\item 小工具规模较小（$\leq 15$顶点）时进行完全验证
-	\item 作为形式化证明的补充，增强可信度
-	\item 快速筛选候选规约，过滤明显错误的设计
-\end{itemize}
-
-\textbf{反例生成：}
-\begin{itemize}[left=2em]
-	\item 当验证失败时，SMT求解器可生成具体反例
-	\item 反例用于指导规约设计的修正
-	\item 构建反例库辅助LLM学习失败模式
+\textbf{D-Wave量子退火机：}
+\begin{itemize}
+	\item 针对Pegasus/Zephyr拓扑优化次嵌入
+	\item 自动调优链强度参数$J_c$
+	\item 集成D-Wave Ocean SDK的嵌入工具
 \end{itemize}
 
 \subsection{预期成果}
 
-\textbf{验证框架：}开发完整的规约正确性验证工具链，包括：
-\begin{itemize}[left=2em]
-	\item LLM证明生成模块：支持多种LLM后端
-	\item Lean4翻译器：自动将证明草稿转化为形式化证明
-	\item SMT验证器：针对小规模实例的穷举验证
-	\item 统一接口：支持多种验证策略的灵活组合
+\textbf{编译器系统：}发布开源问题规约编译器，支持从主流NP难问题到里德堡和D-Wave平台的自动映射。
+
+\textbf{用户接口：}提供命令行工具、Python API和Web界面，降低使用门槛。
+
+\textbf{开发者接口：}支持自定义规约规则和后端扩展，便于社区贡献。
+
+
+\section{研究内容四：量子优化平台实验验证}
+
+\subsection{验证目标}
+
+规约编译器的价值最终体现在实际量子硬件上的求解效果。本研究将与国际合作者开展实验验证，证明编译器生成的规约能高效求解实际问题。
+
+\subsection{里德堡原子阵列验证}
+
+\textbf{合作方：}Harvard/MIT Lukin团队、QuEra Computing Inc.
+
+\textbf{验证平台：}QuEra Aquila量子计算机（256量子比特）及后续升级版本
+
+\textbf{验证内容：}
+\begin{itemize}
+	\item \textbf{编码方案验证}：在真实硬件上验证三角晶格编码\cite{Pan2025Triangular}的性能，与KSG编码\cite{Nguyen2023PRXQuantum}对比
+	\item \textbf{新发现规约测试}：测试LLM发现的新型小工具在实验中的表现
+	\item \textbf{路径选择验证}：对于同一问题的不同规约路径，比较求解成功率和资源开销
 \end{itemize}
 
-\textbf{机器可验证证明库：}为核心规约建立形式化证明：
-\begin{itemize}[left=2em]
-	\item KSG编码\cite{Nguyen2023PRXQuantum}的完整正确性证明
-	\item TLSG编码\cite{Pan2025Triangular}的交叉小工具正确性证明
-	\item 经典QUBO规约（如MAX-CUT到QUBO）的形式化证明
-	\item 本项目新发现规约的配套证明
+\textbf{目标问题：}图着色、MAX-CUT、调度问题等经典NP难问题，规模从数十到数百顶点。
+
+\subsection{D-Wave量子退火机验证}
+
+\textbf{验证平台：}D-Wave Leap云服务（Advantage2系统，5000+量子比特）
+
+\textbf{验证内容：}
+\begin{itemize}
+	\item \textbf{嵌入质量对比}：编译器生成的嵌入方案与Ocean SDK默认方法的比较
+	\item \textbf{链强度优化效果}：自动调优的$J_c$参数对链断裂率的影响
+	\item \textbf{大规模问题求解}：测试1000+变量的实际问题求解质量
 \end{itemize}
 
-\textbf{LLM-to-Lean4翻译器：}实现从自然语言数学推理到形式化证明的自动转换，准确率目标$>70\%$（对于规约相关的证明任务）。
+\textbf{目标问题：}QUBO形式的组合优化问题，包括MAX-CUT、调度、投资组合优化等。
 
+\subsection{验证指标}
 
-\section{研究内容三：硬件感知规约优化}
+\textbf{正确性：}求解结果是否为原问题的有效解，解的质量（与最优解的差距）。
 
-不同物理计算平台具有各自独特的约束条件和优化目标。本研究针对三类典型平台开发专用的规约优化模块，如表\ref{tab:platforms}所示。
+\textbf{效率：}相比人工设计规约，编译器生成方案的资源开销是否更低。
 
-\begin{table}[htbp]
-	\MSzh\MSen\selectfont
-	\centering
-	\caption{目标物理计算平台及优化目标}
-	\label{tab:platforms}
-	\begin{tabular}{|l|l|l|}
-		\hline
-		& & \\[-6pt]
-		\textbf{平台} & \textbf{原生问题} & \textbf{优化目标} \\
-		\hline
-		& & \\[-6pt]
-		里德堡原子阵列 & 单位圆盘图MIS & 最小化原子数，最大化Q因子 \\
-		\hline
-		& & \\[-6pt]
-		D-Wave退火机 & QUBO & 最小化嵌入开销，适应Pegasus拓扑 \\
-		\hline
-		& & \\[-6pt]
-		张量网络 & 图模型 & 最小化树宽，优化收缩顺序 \\
-		\hline
-	\end{tabular}
-\end{table}
+\textbf{自动化程度：}从问题输入到硬件执行的端到端时间，用户干预程度。
 
-\subsection{里德堡原子阵列优化}
-
-里德堡原子阵列通过里德堡阻塞效应原生求解单位圆盘图上的MIS问题\cite{Ebadi2022Science}。优化目标包括：
-
-\textbf{原子数最小化：}
-\begin{itemize}[left=2em]
-	\item 减少编码所需的总原子数，降低实验复杂度
-	\item 探索不同晶格结构（正方、三角、蜂窝）的开销特性
-	\item 针对特定问题实例寻找紧凑编码
-\end{itemize}
-
-\textbf{质量因子Q最大化：}
-\begin{itemize}[left=2em]
-	\item 质量因子$Q$定义为最小可区分距离与阻塞半径之比
-	\item 能量分离度正比于$Q^6$，直接影响求解成功率
-	\item TLSG编码\cite{Pan2025Triangular}实现$Q=\sqrt{3}$，本项目目标是进一步提升
-\end{itemize}
-
-\textbf{针对特定硬件的适配：}
-\begin{itemize}[left=2em]
-	\item 适配QuEra等公司的具体硬件参数（原子数上限、阻塞半径范围）
-	\item 考虑原子位置控制精度的影响
-	\item 针对退火时间约束优化编码设计
-\end{itemize}
-
-\textbf{技术方案：}结合研究内容一的LLM-ILP混合框架，将Q因子最大化作为多目标优化的指标之一。利用申请人团队开发的UnitDiskMapping.jl库\cite{UnitDiskMapping2023}进行快速编码评估。
-
-\subsection{D-Wave嵌入优化}
-
-D-Wave量子退火机采用固定的Pegasus/Zephyr拓扑结构，将任意QUBO问题映射到该拓扑需要次嵌入(minor embedding)\cite{DWave2025Science}。优化目标包括：
-
-\textbf{嵌入开销最小化：}
-\begin{itemize}[left=2em]
-	\item 每个逻辑变量映射到的物理量子比特"链"越短越好
-	\item 最小化总物理量子比特使用数
-	\item 平衡链长度，避免极长链引入的误差
-\end{itemize}
-
-\textbf{链强度优化：}
-\begin{itemize}[left=2em]
-	\item 链内量子比特需保持一致状态，由链强度$J_c$控制
-	\item $J_c$过小导致链断裂，过大压缩问题能量尺度
-	\item 针对不同问题结构自动调优$J_c$
-\end{itemize}
-
-\textbf{拓扑感知规约：}
-\begin{itemize}[left=2em]
-	\item 在QUBO规约阶段就考虑目标拓扑的连接模式
-	\item 优先使用Pegasus/Zephyr中高连接度的量子比特
-	\item 针对常见问题结构预计算优化嵌入模板
-\end{itemize}
-
-\textbf{技术方案：}利用D-Wave Ocean SDK的嵌入工具作为基础，开发LLM辅助的规约优化层。通过强化学习训练嵌入策略网络，实现比启发式方法更优的嵌入质量。
-
-\subsection{张量网络收缩优化}
-
-张量网络方法\cite{Liu2021PRL,Liu2023SIAM}的计算复杂度由收缩顺序决定，核心指标是树宽。优化目标包括：
-
-\textbf{树宽最小化：}
-\begin{itemize}[left=2em]
-	\item 收缩复杂度为$O(\exp(\text{tw}))$，树宽每降低1可带来指数级加速
-	\item 利用问题结构（如稀疏性、对称性）寻找低树宽分解
-	\item 探索近似算法与精确算法的权衡
-\end{itemize}
-
-\textbf{收缩顺序优化：}
-\begin{itemize}[left=2em]
-	\item 给定树分解，寻找最优的张量收缩顺序
-	\item 考虑内存使用与计算时间的平衡
-	\item 针对GPU并行性优化收缩策略
-\end{itemize}
-
-\textbf{规约引导分解：}
-\begin{itemize}[left=2em]
-	\item 在问题规约阶段引入结构约束，使目标问题具有低树宽
-	\item 牺牲少量问题规模换取显著的树宽降低
-	\item 针对特定问题类别设计专用规约-分解联合优化
-\end{itemize}
-
-\textbf{技术方案：}扩展申请人团队开发的GenericTensorNetworks.jl库\cite{GenericTensorNetworks2023}，集成LLM辅助的收缩顺序搜索。利用强化学习训练收缩策略，结合传统的最小度算法和分离器方法。
+\textbf{可扩展性：}随问题规模增大，编译时间和硬件资源的增长趋势。
 
 \subsection{预期成果}
 
-\textbf{平台特定优化模块：}为三类目标平台分别开发专用优化模块：
-\begin{itemize}[left=2em]
-	\item 里德堡优化器：支持多种晶格结构，输出可直接用于实验的原子坐标
-	\item D-Wave嵌入器：集成于Ocean SDK，提供比默认方法更优的嵌入质量
-	\item 张量收缩器：与GenericTensorNetworks.jl无缝集成
-\end{itemize}
+\textbf{实验数据：}在里德堡和D-Wave平台上的系统性实验结果，验证编译器的实用性。
 
-\textbf{基准测试集：}构建包含多种问题类型和规模的标准测试集：
-\begin{itemize}[left=2em]
-	\item 图优化问题：MIS、MAX-CUT、图着色等
-	\item 约束满足问题：SAT、CSP等
-	\item 实际应用问题：调度、路由、组合设计等
-\end{itemize}
+\textbf{最佳实践：}总结不同问题类型和规模的最优规约策略，形成用户指南。
 
-\textbf{硬件验证：}与合作者开展实验验证：
-\begin{itemize}[left=2em]
-	\item 与Harvard/MIT Lukin组合作进行里德堡原子实验
-	\item 利用D-Wave Leap云服务进行量子退火实验
-	\item 在GPU集群上进行大规模张量网络计算
-\end{itemize}
+\textbf{反馈改进：}根据实验结果优化编译器的路径选择和后端代码生成。
 
 
 \section{特色与创新点}
 
 本项目的研究具有以下四个方面的特色与创新：
 
-\textbf{创新点一：首次系统研究LLM辅助问题规约自动发现。}
-\begin{itemize}[left=2em]
-	\item 将AlphaEvolve范式\cite{AlphaEvolve2025}创新性地应用于组合问题规约领域
-	\item 提出LLM生成与ILP验证相结合的混合框架，兼具生成能力与可证明正确性
-	\item 建立从知识编码、候选生成到进化优化的完整方法论
-	\item 填补LLM在计算复杂性理论应用方面的研究空白
-\end{itemize}
+\textbf{创新点一：首次建立问题规约的代价模型理论。}将规约选择形式化为多项式代价图上的路径优化问题，研究代价比较的可判定性和Pareto最优路径的计算，为规约编译器提供理论基础。这一理论框架借鉴编译器优化的成熟思想，但针对规约代价的多项式特性进行了创新性扩展。
 
-\textbf{创新点二：形式化验证保证规约正确性。}
-\begin{itemize}[left=2em]
-	\item 首次将问题规约的正确性性质形式化为可机器验证的规范
-	\item 开发LLM辅助的证明生成技术，降低形式化验证门槛
-	\item 实现自然语言证明到Lean4形式化证明的自动翻译
-	\item 建立规约正确性证明的可复用库，促进知识积累
-\end{itemize}
+\textbf{创新点二：提出LLM驱动的测试先行规约发现方法。}将软件工程的TDD理念与大语言模型结合，实现规约的规模化发现。关键创新在于将ILP/SMT求解器作为精确验证器嵌入生成循环，确保产出规约的可证明正确性，而非仅依赖测试覆盖。
 
-\textbf{创新点三：硬件感知的端到端规约优化框架。}
-\begin{itemize}[left=2em]
-	\item 突破传统规约研究只关注渐进复杂度的局限
-	\item 针对里德堡、D-Wave、张量网络三类平台建立专用优化方法
-	\item 实现从问题定义到硬件执行的端到端自动化
-	\item 通过硬件实验验证规约的实际效果
-\end{itemize}
+\textbf{创新点三：构建首个问题规约编译器系统。}让用户像使用传统编译器一样使用量子优化平台——只需描述问题，无需了解硬件细节。编译器集成规约知识库、路径规划和硬件后端，实现端到端自动化。
 
-\textbf{创新点四：开源工具链推动社区发展。}
-\begin{itemize}[left=2em]
-	\item 扩展problem-reductions库\cite{ProblemReductions2025}，实现100+种问题和规约
-	\item 每条规约配备形式化验证和硬件适配信息
-	\item 降低物理计算平台的使用门槛，促进技术普及
-	\item 建立开放的规约知识库，支持社区贡献和持续扩展
-\end{itemize}
+\textbf{创新点四：开源规约知识库推动社区发展。}扩展problem-reductions库\cite{ProblemReductions2025}至100+规约规则，每条规约配备代价多项式、正确性证明和硬件适配信息。这将显著降低量子优化平台的使用门槛，促进技术普及。
 
 
 \section{年度研究计划}
@@ -438,38 +297,39 @@ D-Wave量子退火机采用固定的Pegasus/Zephyr拓扑结构，将任意QUBO�
 		\hline
 		& \\[-6pt]
 		第一年 &
-		\textbf{基础构建与原型开发} \newline
-		$\bullet$ 构建规约设计知识库，整理已知小工具和规约规则 \newline
-		$\bullet$ 开发LLM-ILP混合原型系统，验证技术可行性 \newline
-		$\bullet$ 完成三角晶格编码的实验验证，发表1-2篇论文 \\
+		\textbf{理论基础与方法原型} \newline
+		$\bullet$ 建立规约代价模型的形式化框架 \newline
+		$\bullet$ 开发LLM驱动规约发现的原型系统 \newline
+		$\bullet$ 完成三角晶格编码的里德堡实验验证 \newline
+		$\bullet$ 发现20+规约规则，发表1-2篇论文 \\
 		\hline
 		& \\[-6pt]
 		第二年 &
-		\textbf{形式化验证框架开发} \newline
-		$\bullet$ 设计规约正确性的Lean4形式化规范 \newline
-		$\bullet$ 开发LLM-to-Lean4翻译器原型 \newline
-		$\bullet$ 完成5-10条核心规约的形式化验证 \newline
-		$\bullet$ 发现2-3种新型高质量小工具 \\
+		\textbf{编译器核心开发} \newline
+		$\bullet$ 实现路径优化算法和Pareto前沿计算 \newline
+		$\bullet$ 开发编译器核心模块（知识库、路径规划器） \newline
+		$\bullet$ 扩展规约知识库至50+规则 \newline
+		$\bullet$ 发表2篇论文 \\
 		\hline
 		& \\[-6pt]
 		第三年 &
-		\textbf{硬件优化与实验验证} \newline
-		$\bullet$ 开发三类平台的专用优化模块 \newline
-		$\bullet$ 构建基准测试集，系统评估规约质量 \newline
-		$\bullet$ 与合作者开展里德堡和D-Wave实验验证 \newline
-		$\bullet$ 发现3-5种新型规约，发表2-3篇论文 \\
+		\textbf{系统集成与实验验证} \newline
+		$\bullet$ 完成编译器全部模块的集成 \newline
+		$\bullet$ 开发里德堡和D-Wave硬件后端 \newline
+		$\bullet$ 与合作者开展系统性实验验证 \newline
+		$\bullet$ 扩展规约知识库至80+规则，发表2-3篇论文 \\
 		\hline
 		& \\[-6pt]
 		第四年 &
-		\textbf{系统集成与开源发布} \newline
-		$\bullet$ 完成工具链的系统集成与优化 \newline
-		$\bullet$ 将problem-reductions库扩展至100+规约 \newline
+		\textbf{优化完善与开源发布} \newline
+		$\bullet$ 根据实验反馈优化编译器性能 \newline
+		$\bullet$ 完成100+规约规则的知识库建设 \newline
 		$\bullet$ 开源发布完整工具链及文档 \newline
 		$\bullet$ 撰写综述论文，总结研究成果 \\
 		\hline
 	\end{tabular}
 \end{table}
 
-各年度研究内容相互衔接：第一年奠定技术基础并验证核心思路，第二年完善验证机制确保可靠性，第三年针对硬件优化并实验验证，第四年进行系统集成和成果推广。这一安排确保项目稳步推进，各阶段成果可检验、可积累。
+各年度研究内容相互衔接：第一年建立理论基础并验证方法可行性，第二年开发编译器核心功能，第三年进行系统集成和硬件验证，第四年优化完善并开源发布。这一安排确保项目稳步推进，各阶段成果可检验、可积累。
 
 \newpage
