@@ -1,51 +1,64 @@
+% 三1基础.tex - 研究基础与可行性分析
 
+\subsection*{申请人研究背景}
 
-这里可能需要列出自己的相关文章。由于文章和依据部分的文献的格式并不一定一致，建议使用下边方法：
-\begin{lstlisting}[language=tex, basicstyle=\ttfamily\tiny, keywordstyle=\color{blue}, commentstyle=\color{gray}]
-	\begin{thebibliography}{1}
-		\bibitem{test}
-		\bibauthor{\textbf{C\"aldognetto T\@, Tenti P}}\@. 
-		\bibtitle{Microgrids Operation Based on Master–Slave Cooperative Control}
-		\bibmark{[J]}\@.
-		\bibjournal{IEEE Journal of Emerging and Selected Topics in Power Electronics}\@,
-		\bibvolume{2}\bibnumber{(4)}\thinspace{}\textnormal{:}
-		\bibpages{1081\thinspace{}\textnormal{--}\thinspace{}1088}\@,
-		\bibyear{2014}\@.
-		\url{doi: 10.1109/JESTPE.2014.2345052}\@.
-	\end{thebibliography}
-\end{lstlisting}
-效果如下。这个东西从哪里来的呢？从编译产生的\verb|.bbl|文件中拷贝过来放进来，就可以了。
-%\vspace{-50pt}
-%\begin{thebibliography}{1}
-%	\providecommand{\bibauthor}[1]{#1}
-%	\providecommand{\bibeditor}[1]{#1}
-%	\providecommand{\bibtranslator}[1]{#1}
-%	\providecommand{\bibtitle}[1]{#1}
-%	\providecommand{\bibbooktitle}[1]{#1}
-%	\providecommand{\bibjournal}[1]{#1}
-%	\providecommand{\bibmark}[1]{#1}
-%	\providecommand{\bibcountry}[1]{#1}
-%	\providecommand{\bibpatentid}[1]{#1}
-%	\providecommand{\bibedition}[1]{#1}
-%	\providecommand{\biborganization}[1]{#1}
-%	\providecommand{\bibaddress}[1]{#1}
-%	\providecommand{\bibpublisher}[1]{#1}
-%	\providecommand{\bibinstitution}[1]{#1}
-%	\providecommand{\bibschool}[1]{#1}
-%	\providecommand{\bibvolume}[1]{#1}
-%	\providecommand{\bibnumber}[1]{#1}
-%	\providecommand{\bibversion}[1]{#1}
-%	\providecommand{\bibpages}[1]{#1}
-%	\providecommand{\bibmodifydate}[1]{#1}
-%	\providecommand{\bibcitedate}[1]{#1}
-%	\providecommand{\bibyear}[1]{#1}
-%	\providecommand{\bibdate}[1]{#1}
-%	\providecommand{\biburl}[1]{\newline\url{#1}}
-%	\bibitem{test}
-%	\bibauthor{\textbf{C\"aldognetto T\@, Tenti P}}\@. \bibtitle{Microgrids Operation Based
-%		on Master–Slave Cooperative Control}\bibmark{[J/OL]}\@. \bibjournal{IEEE
-%		Journal of Emerging and Selected Topics in Power Electronics}\@,
-%	\bibvolume{2}\bibnumber{(4)}\thinspace{}\textnormal{:
-%	}\bibpages{1081\thinspace{}\textnormal{--}\thinspace{}1088}\@,
-%	\bibyear{2014}\@. \url{doi: 10.1109/JESTPE.2014.2345052}\@.
-%\end{thebibliography}
+申请人刘金国博士毕业于南京大学物理系，师从王强华教授。随后在中国科学院物理研究所从事博士后研究（合作导师：王磊研究员），从事物理与人工智能交叉领域研究。2020-2022年在哈佛大学Mikhail Lukin教授团队从事博士后研究，期间担任QuEra Computing Inc.全职顾问6个月，深度参与里德堡原子量子计算的产业化进程。现任香港科技大学（广州）功能枢纽先进材料学域助理教授，指导研究团队（7名博士生+1名硕士生）开展下一代量子计算设备与算法研究。
+
+申请人在可微编程、张量网络、量子计算等领域发表论文40余篇，Google Scholar引用2800余次，h-index 15。2022年获北京市科学技术奖自然科学二等奖（排名4/9），该奖项涉及申请人参与发展的热带张量网络技术。申请人在哈佛期间与QuEra Computing Inc.共同申请美国专利（No. 63/323,863），为该公司量子优化求解器核心产品提供技术支撑。
+
+\subsection*{代表性研究成果}
+
+申请人在量子优化算法、张量网络、问题映射等方面积累了系统性研究成果，为本项目奠定坚实基础。以下列出与本项目直接相关的四项代表性成果：
+
+\textbf{成果一：里德堡原子量子优化实验验证}
+
+申请人作为核心成员参与了里德堡原子量子优化的首次大规模实验验证\cite{ebadi2022quantum}。该工作使用289个量子比特的里德堡原子阵列求解最大独立集问题，在特定问题实例上展现了相对于经典算法的超线性加速证据。申请人负责优化算法设计与问题映射方案开发。该成果发表于\emph{Science}，被评价为量子优化领域的里程碑式工作。
+
+\textbf{成果二：热带张量网络精确基态计算}
+
+申请人提出热带张量网络方法\cite{liu2021tropical}，将张量网络技术与热带代数相结合，实现自旋玻璃系统基态的精确计算。该方法突破了传统张量网络方法的限制，可在多项式复杂度内精确求解特定图结构的NP难问题。该成果发表于\emph{Physical Review Letters}，为本项目的精确求解与验证提供理论工具。
+
+\textbf{成果三：三角晶格编码方案与自动化小工具搜索}
+
+申请人近期提出三角晶格编码方案（论文审稿中），将问题映射的质量因子从$Q=\sqrt{2}$（国王子图编码）提升至$Q=\sqrt{3}$，能量分离从8提高到27。更重要的是，申请人开发了基于整数线性规划（ILP）的自动化小工具搜索方法，在$4^{12} \approx 1600$万的搜索空间中高效发现了12顶点交叉小工具。该方法将约束违规减少约两个数量级，为本项目的形式化验证提供关键技术储备。
+
+\textbf{成果四：量子计算开源软件生态}
+
+申请人主导开发了多个有影响力的开源软件：
+\begin{itemize}[leftmargin=2em, topsep=0pt, itemsep=0pt]
+\item \textbf{Yao.jl}：Julia生态最流行的量子模拟器，GitHub近千星标，获Unitary Fund资助\cite{luo2020yao}
+\item \textbf{GenericTensorNetworks.jl}：泛型张量网络算法库，为QuEra公司科学计算方向提供基础支撑\cite{liu2022computing}
+\item \textbf{UnitDiskMapping.jl}：单位圆盘图映射与三角晶格编码实现
+\item \textbf{GadgetSearch.jl}：基于ILP的自动化小工具搜索工具
+\end{itemize}
+这些软件将直接服务于本项目的算法验证与形式化证明。
+
+\subsection*{可行性分析}
+
+\textbf{1. 理论基础深厚}
+
+申请人在张量网络、量子优化、可微编程等领域发表高水平论文40余篇，积累引用2800余次。代表性工作包括可微张量网络\cite{liao2019differentiable}、热带张量网络\cite{liu2021tropical}、量子电路Born机\cite{liu2018differentiable}等，为本项目的理论创新提供坚实基础。
+
+\textbf{2. 技术储备充分}
+
+申请人已在问题归约与小工具设计方面积累大量经验。开发的GadgetSearch.jl实现了基于ILP的小工具自动发现，三角晶格编码工作验证了形式化方法的可行性。这些技术可直接扩展用于机器辅助证明系统的开发。
+
+\textbf{3. 国际合作网络}
+
+申请人与国际顶尖团队保持密切合作：
+\begin{itemize}[leftmargin=2em, topsep=0pt, itemsep=0pt]
+\item 哈佛大学Mikhail Lukin教授团队：里德堡原子量子系统实验验证
+\item 杜克大学Ruichao Ma教授团队：超导量子系统与光场耦合
+\item 清华大学、中科院物理研究所：理论与计算支撑
+\end{itemize}
+这些合作关系确保本项目成果可获得实验平台的验证与推广。
+
+\textbf{4. 风险可控}
+
+本项目设置了合理的技术备选方案：
+\begin{itemize}[leftmargin=2em, topsep=0pt, itemsep=0pt]
+\item 若LLM辅助证明效果不理想，可退回到ILP精确搜索方法作为基准
+\item 若Lean4形式化证明难度过高，可先使用SMT求解器进行自动验证
+\item 三角晶格编码已有成熟实现，可作为形式化证明的首个目标
+\end{itemize}
+这种渐进式策略确保项目在不同技术路线上均有产出。
