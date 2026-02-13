@@ -1,0 +1,178 @@
+# NSFC 2026 面上项目 - 项目配置文件
+
+# ============================================================================
+# 项目信息
+# ============================================================================
+
+project:
+  name: nsfc2026-llm-problem-reduction
+  version: 1.0.0
+  description: NSFC 2026 面上项目申请书 - LLM辅助面向物理计算平台的问题规约自动发现与验证
+  type: NSFC_General  # 面上项目
+  year: 2026
+  applicant: 刘金国
+
+# ============================================================================
+# 研究主题
+# ============================================================================
+
+research:
+  title_zh: LLM辅助面向物理计算平台的问题规约自动发现与验证
+  title_en: LLM-assisted Automatic Discovery and Verification of Problem Reductions for Physical Computing Platforms
+
+  directions:
+    - name: LLM辅助规约小工具自动发现
+      description: 利用LLM + ILP自动生成和验证规约小工具
+    - name: 规约正确性形式化验证
+      description: 与Lean4/mathlib定理证明器集成
+    - name: 硬件感知规约优化
+      description: 针对Rydberg/D-Wave/TN的硬件感知优化
+
+# ============================================================================
+# 语言配置
+# ============================================================================
+
+language:
+  default: 简体中文
+  encoding: UTF-8
+  latex_engine: xelatex
+
+# ============================================================================
+# LaTeX 编译配置
+# ============================================================================
+
+latex_config:
+  engine: xelatex
+  main_file: 面上项目-正文-2026.tex
+  interaction_mode: nonstopmode
+  max_runs: 3
+
+  auxiliary_files_to_clean:
+    - .aux
+    - .bbl
+    - .blg
+    - .log
+    - .out
+    - .toc
+    - .lof
+    - .lot
+    - .fdb_latexmk
+    - .fls
+    - .synctex.gz
+    - .gz
+
+# ============================================================================
+# 参考文献配置
+# ============================================================================
+
+bibliography:
+  format: bibtex
+  main_file: ref.bib
+  style: bibs/gbt7714-numerical.bst
+
+  key_references:
+    applicant_work:
+      - Ebadi2022Science
+      - Liu2021PRL
+      - Liu2023SIAM
+      - Nguyen2023PRXQuantum
+      - Pan2025Triangular
+      - Luo2020Quantum
+    external:
+      - AlphaEvolve2025
+      - DWave2025Science
+      - Lucas2014Frontiers
+
+# ============================================================================
+# 目录结构
+# ============================================================================
+
+directory_structure:
+  sections:
+    description: 内容文件
+    files:
+      - 一依据.tex
+      - 二内容.tex
+      - 三1基础.tex
+      - 三2条件.tex
+      - 三3正承担.tex
+      - 三4已完成.tex
+      - 四*.tex
+      - 个性化设置.sty
+
+  figures:
+    description: 图片资源
+
+  references:
+    description: 参考文献PDF
+    subdirs:
+      - md  # 转换后的Markdown
+
+  docs:
+    description: 文档
+    subdirs:
+      - plans  # 实施计划
+
+  skills:
+    description: 项目专用技能
+
+# ============================================================================
+# 工程原则
+# ============================================================================
+
+engineering_principles:
+  - KISS (Keep It Simple, Stupid)
+  - YAGNI (You Aren't Gonna Need It)
+  - DRY (Don't Repeat Yourself)
+  - 奥卡姆剃刀 (Occam's Razor)
+
+principle_priority:
+  - 正确性
+  - 简洁性
+  - 清晰性
+
+# ============================================================================
+# AI 辅助开发配置
+# ============================================================================
+
+ai_assistance:
+  claude_code:
+    instruction_file: CLAUDE.md
+    enabled: true
+
+  openai_codex:
+    instruction_file: AGENTS.md
+    enabled: true
+
+  default_language: 简体中文
+
+# ============================================================================
+# 约束条件
+# ============================================================================
+
+constraints:
+  max_pages: 30
+  do_not_modify:
+    - 面上项目-正文-2026.tex
+    - nsfc.sty
+  section_headers: NSFC-mandated  # 章节标题由NSFC规定，不可修改
+
+# ============================================================================
+# Git 配置
+# ============================================================================
+
+git:
+  main_branch: main
+  feature_branch: jg/2026
+
+  ignore_patterns:
+    - "*.aux"
+    - "*.bbl"
+    - "*.blg"
+    - "*.log"
+    - "*.out"
+    - "*.toc"
+    - "*.synctex.gz"
+    - ".DS_Store"
+    - ".venv/"
+    - "__pycache__/"
