@@ -150,3 +150,4 @@ skills/**/__pycache__/
 # 取消注释以忽略个人笔记
 # personal.md
 # survey.md
+*.pdf
