@@ -1,88 +1,98 @@
+%!TEX program = xelatex
 \documentclass[tikz,border=5pt]{standalone}
 \usepackage{tikz}
 \usepackage{xeCJK}
-\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, calc}
+\usetikzlibrary{arrows.meta, positioning, fit, backgrounds, calc}
 
-\setCJKmainfont{STKaiti}
+\setCJKmainfont[Path=../fonts/, AutoFakeBold=3, Scale=0.98]{simkai.ttf}
 
-\definecolor{theorycolor}{RGB}{147,112,219}    % Medium purple
-\definecolor{methodcolor}{RGB}{100,149,237}    % Cornflower blue
-\definecolor{systemcolor}{RGB}{144,238,144}    % Light green
-\definecolor{validcolor}{RGB}{255,182,108}     % Light orange
-\definecolor{inputcolor}{RGB}{200,200,200}     % Light gray
-\definecolor{outputcolor}{RGB}{255,218,185}    % Peach
+\definecolor{theorycolor}{RGB}{147,112,219}
+\definecolor{methodcolor}{RGB}{100,149,237}
+\definecolor{systemcolor}{RGB}{144,238,144}
+\definecolor{validcolor}{RGB}{255,182,108}
+\definecolor{inputcolor}{RGB}{200,200,200}
+\definecolor{outputcolor}{RGB}{255,218,185}
 
 \begin{document}
 \begin{tikzpicture}[
-    node distance=1cm and 1.2cm,
-    box/.style={rectangle, rounded corners, draw, minimum width=2.6cm, minimum height=0.9cm, align=center, font=\small},
+    box/.style={rectangle, rounded corners, draw, minimum width=2.4cm,
+                minimum height=0.85cm, align=center, font=\normalsize},
     inputbox/.style={box, fill=inputcolor},
     theorybox/.style={box, fill=theorycolor!40},
     methodbox/.style={box, fill=methodcolor!40},
     systembox/.style={box, fill=systemcolor!60},
     validbox/.style={box, fill=validcolor!70},
-    outputbox/.style={box, fill=outputcolor},
-    arrow/.style={-{Stealth[length=2mm]}, thick},
-    dasharrow/.style={-{Stealth[length=2mm]}, thick, dashed},
-    label/.style={font=\footnotesize\bfseries},
+    outputbox/.style={box, fill=outputcolor, minimum width=1.6cm, minimum height=1.8cm},
+    arr/.style={-{Stealth[length=2mm]}, thick},
+    darr/.style={-{Stealth[length=2mm]}, thick, dashed},
+    elabel/.style={font=\footnotesize, fill=white, inner sep=1pt},
+    glabel/.style={font=\small\bfseries},
 ]
 
-% Input - User Problem
-\node[inputbox] (input) {用户问题\\NP困难问题实例};
+% === ROW 2 (y=0): Main flow ===
+\node[inputbox] (input) at (0, 0) {用户问题\\NP困难问题实例};
 
-% Central System - Compiler (研究内容三)
-\node[systembox, right=3cm of input, minimum width=3.5cm, minimum height=2.5cm] (compiler) {问题规约编译器};
-\node[font=\tiny, below=0.1cm of compiler.north] {路径规划 + 规约执行};
+\node[systembox, minimum width=4.0cm, minimum height=1.8cm] (compiler) at (5.2, 0) {};
+\node[font=\normalsize\bfseries] at (5.2, 0.35) {问题规约编译器};
+\node[font=\footnotesize] at (5.2, -0.35) {路径规划 + 规约执行};
 
-% Theory layer (研究内容一) - above compiler
-\node[theorybox, above=1.5cm of compiler] (theory) {代价模型理论};
-\node[theorybox, right=0.8cm of theory] (pareto) {路径优化算法};
+\node[validbox] (rydberg) at (10.2, 0.55) {里德堡原子阵列};
+\node[validbox] (dwave)   at (10.2,-0.55) {D-Wave退火机};
 
-% Method layer (研究内容二) - left of compiler
-\node[methodbox, below=1.5cm of input] (llm) {LLM生成};
-\node[methodbox, right=0.8cm of llm] (verify) {ILP/SMT验证};
-\node[methodbox, right=0.8cm of verify] (rules) {规约知识库\\(100+规则)};
+\node[outputbox] (output) at (12.8, 0) {优化解};
 
-% Validation layer (研究内容四) - right of compiler
-\node[validbox, right=2.5cm of compiler] (rydberg) {里德堡原子阵列};
-\node[validbox, below=0.6cm of rydberg] (dwave) {D-Wave退火机};
+% === ROW 1 (y=2.6): Theory ===
+\node[theorybox] (theory) at (3.5, 2.6) {代价模型理论};
+\node[theorybox] (pareto) at (6.9, 2.6) {路径优化算法};
 
-% Output
-\node[outputbox, right=1.5cm of dwave] (output) {优化解};
+% === ROW 3 (y=-2.6): Method ===
+\node[methodbox] (llm)    at (0.8, -2.6) {LLM生成};
+\node[methodbox] (verify)  at (3.6, -2.6) {ILP验证};
+\node[methodbox] (rules)  at (6.5, -2.6) {规约知识库\\(100+规则)};
 
-% Arrows - main flow
-\draw[arrow] (input) -- node[above, font=\tiny] {问题实例} (compiler);
-\draw[arrow] (compiler) -- node[above, font=\tiny] {硬件映射} (rydberg);
-\draw[arrow] (compiler) -- (dwave);
-\draw[arrow] (rydberg) -- (output);
-\draw[arrow] (dwave) -- (output);
+% === Arrows: main flow ===
+\draw[arr] (input) -- node[elabel, above] {问题实例} (compiler);
+\draw[arr] (compiler.east |- rydberg) -- node[elabel, above] {硬件映射} (rydberg);
+\draw[arr] (compiler.east |- dwave) -- (dwave);
+\draw[arr] (rydberg) -- (output.west |- rydberg);
+\draw[arr] (dwave)   -- (output.west |- dwave);
 
-% Theory to compiler
-\draw[arrow] (theory) -- node[left, font=\tiny] {最优路径} (compiler);
-\draw[arrow] (pareto) -- (compiler);
+% === Arrows: theory → compiler ===
+\draw[arr] (theory) -- node[elabel, left] {最优路径} (theory |- compiler.north);
+\draw[arr] (pareto) -- (pareto |- compiler.north);
 
-% Rules to compiler
-\draw[arrow] (rules) -- node[right, font=\tiny] {规约规则} (compiler);
+% === Arrows: rules → compiler ===
+\draw[arr] (rules) -- node[elabel, right] {规约规则} (rules |- compiler.south);
 
-% LLM pipeline
-\draw[arrow] (llm) -- (verify);
-\draw[arrow] (verify) -- (rules);
+% === Arrows: LLM pipeline ===
+\draw[arr] (llm) -- (verify);
+\draw[arr] (verify) -- (rules);
 
-% Feedback
-\draw[dasharrow, color=red!70!black] (output.south) -- ++(0,-0.5) -| node[below, pos=0.25, font=\tiny, text=red!70!black] {实验反馈} (llm.south);
 
-% Labels
-\node[label, above=0.1cm of theory.north west, anchor=south west, text=theorycolor!80!black] {研究内容一：理论基础};
-\node[label, left=0.1cm of llm.west, anchor=east, text=methodcolor!80!black] {研究内容二：方法创新};
-\node[label, above=0.1cm of compiler.north, anchor=south, text=systemcolor!80!black] {研究内容三：系统构建};
-\node[label, above=0.1cm of rydberg.north, anchor=south, text=validcolor!80!black] {研究内容四：实验验证};
+% === Group labels ===
+\node[glabel, text=theorycolor!80!black,
+      above left=0.15cm and 0cm of theory.north west, anchor=south west]
+  {研究内容一：理论基础};
+\node[glabel, text=methodcolor!80!black,
+      below=0.15cm of rules.south east, anchor=north east]
+  {研究内容二：方法创新};
+\node[glabel, text=systemcolor!40!black,
+      above left=0.05cm and -0.3cm of compiler.north west, anchor=south west]
+  {研究内容三：系统构建};
+\node[glabel, text=validcolor!80!black,
+      above left=0.15cm and 0cm of rydberg.north west, anchor=south west]
+  {研究内容四：实验验证};
 
-% Background boxes
+% === Background boxes ===
 \begin{scope}[on background layer]
-    \node[draw=theorycolor!80!black, fill=theorycolor!10, rounded corners, fit=(theory)(pareto), inner sep=0.25cm] {};
-    \node[draw=methodcolor!80!black, fill=methodcolor!10, rounded corners, fit=(llm)(verify)(rules), inner sep=0.25cm] {};
-    \node[draw=systemcolor!80!black, fill=systemcolor!10, rounded corners, fit=(compiler), inner sep=0.15cm] {};
-    \node[draw=validcolor!80!black, fill=validcolor!10, rounded corners, fit=(rydberg)(dwave), inner sep=0.25cm] {};
+    \node[draw=theorycolor!80!black, fill=theorycolor!8, rounded corners,
+          fit=(theory)(pareto), inner sep=0.2cm] {};
+    \node[draw=methodcolor!80!black, fill=methodcolor!8, rounded corners,
+          fit=(llm)(verify)(rules), inner sep=0.2cm] {};
+    \node[draw=systemcolor!80!black, fill=systemcolor!12, rounded corners,
+          fit=(compiler), inner sep=0.1cm] {};
+    \node[draw=validcolor!80!black, fill=validcolor!12, rounded corners,
+          fit=(rydberg)(dwave), inner sep=0.2cm] {};
 \end{scope}
 
 \end{tikzpicture}
