@@ -103,3 +103,22 @@ xelatex 面上项目-正文-2026.tex
 3. 硬件感知规约优化（Rydberg/D-Wave/TN）
 
 核心引用：`Ebadi2022Science`, `Liu2021PRL`, `Liu2023SIAM`, `Pan2025Triangular`, `AlphaEvolve2025`
+
+## Skills
+
+项目自定义技能位于 `.claude/skills/`，可在对话中调用。
+
+| 技能 | 描述 | 入口 |
+|------|------|------|
+| `check-review-alignment` | AI 驱动的综述引用语义核查与自动渲染 | `python3 scripts/run_ai_alignment.py --work-dir <dir> --prepare/--render` |
+| `transfer_old_latex_to_new` | NSFC LaTeX 标书跨版本智能迁移 | `python scripts/run.py analyze/apply/compile/restore` |
+| `nsfc-research-content-writer` | 研究内容+创新+年度计划编排写作 | Skill 调用，输出到 `extraTex/2.*.tex` |
+| `nsfc-justification-writer` | 科研立项依据写作/重构 | `python scripts/run.py coach/apply-section/diagnose` |
+| `nsfc-research-foundation-writer` | 研究基础+工作条件+风险应对写作 | Skill 调用，输出到 `extraTex/3.*.tex` |
+| `nsfc-abstract` | 中英文摘要生成（中文≤400字；英文≤4000字符） | Skill 调用，输出到 `NSFC-ABSTRACTS.md` |
+| `nsfc-bib-manager` | 引用与 Bib 管理，避免幻觉引用 | Skill 调用 |
+| `systematic-literature-review` | 相关性评分驱动的系统综述流水线 | `python scripts/pipeline_runner.py --topic "{主题}"` |
+| `get-review-theme` | 多源输入的结构化综述主题提取 | Skill 调用，支持 text/yaml/json 输出 |
+| `guide-updater` | 项目指南实时更新器 | `/guide-updater --guide-path <路径>` |
+| `make_latex_model` | LaTeX 模板高保真优化器（对齐 Word 模板） | `python3 scripts/enhanced_optimize.py --project projects/{project}` |
+| `complete_example` | AI 增强版 LaTeX 示例智能生成器 | `/complete_example <project_name> [options]` |

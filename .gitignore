@@ -151,3 +151,5 @@ skills/**/__pycache__/
 # personal.md
 # survey.md
 *.pdf
+*.synctex(busy)
+runs/
