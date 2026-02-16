@@ -2,7 +2,8 @@
 # Makefile for NSFC 2026 Proposal
 # ==============================================================================
 # Targets:
-#   make pdf          - Build the proposal PDF (default)
+#   make pdf          - Build the proposal PDF (default, includes figs)
+#   make figs         - Compile standalone TikZ figures in figures/
 #   make refs-md      - Convert reference PDFs to Markdown (pymupdf4llm)
 #   make bib-md       - Convert ref.bib to Markdown (formatted bibliography)
 #   make all-md       - Convert both references and bib to Markdown
@@ -15,6 +16,9 @@
 MAIN_TEX    := 面上项目-正文-2026.tex
 MAIN_PDF    := 面上项目-正文-2026.pdf
 BIB_FILE    := ref.bib
+FIG_DIR     := figures
+FIG_SRCS    := $(wildcard $(FIG_DIR)/*.tex)
+FIG_PDFS    := $(FIG_SRCS:.tex=.pdf)
 
 REF_DIR     := references
 MD_DIR      := references/md
@@ -39,9 +43,17 @@ $(VENV_PYTHON):
 	python3 -m venv "$(VENV_DIR)"
 	"$(VENV_DIR)/bin/pip" install pymupdf4llm
 
+# --- Build standalone figures -------------------------------------------------
+.PHONY: figs
+figs: $(FIG_PDFS)
+
+$(FIG_DIR)/%.pdf: $(FIG_DIR)/%.tex
+	-cd "$(FIG_DIR)" && xelatex -interaction=nonstopmode "$(notdir $<)"
+	@rm -f $(FIG_DIR)/*.aux $(FIG_DIR)/*.log
+
 # --- Build proposal PDF -------------------------------------------------------
 .PHONY: pdf
-pdf:
+pdf: figs
 	xelatex "$(MAIN_TEX)"
 	-bibtex "$(basename $(MAIN_TEX) .tex)"
 	xelatex "$(MAIN_TEX)"
@@ -87,6 +99,7 @@ all-md: refs-md bib-md
 .PHONY: clean
 clean:
 	rm -f *.aux *.bbl *.blg *.log *.out *.fdb_latexmk *.fls *.synctex.gz *.gz
+	rm -f $(FIG_DIR)/*.aux $(FIG_DIR)/*.log
 
 .PHONY: distclean
 distclean: clean
@@ -98,6 +111,7 @@ distclean: clean
 help:
 	@echo "Available targets:"
 	@echo "  make pdf        - Build proposal PDF with XeLaTeX (default)"
+	@echo "  make figs       - Compile standalone TikZ figures"
 	@echo "  make refs-md    - Convert reference PDFs to Markdown (pymupdf4llm)"
 	@echo "  make bib-md     - Convert ref.bib to Markdown bibliography"
 	@echo "  make all-md     - Convert both references and bib to Markdown"

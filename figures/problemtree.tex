@@ -1,0 +1,164 @@
+%!TEX program = xelatex
+\documentclass[tikz,border=6pt]{standalone}
+\usepackage{tikz}
+\usepackage{xeCJK}
+\usetikzlibrary{arrows.meta, positioning, calc, decorations.pathreplacing}
+\setCJKmainfont[Path=../fonts/, AutoFakeBold=3, Scale=0.98]{simkai.ttf}
+
+% === Color Palette ===
+\definecolor{cPlat}{HTML}{1A5276}
+\definecolor{cPlatFill}{HTML}{D4E6F1}
+\definecolor{cHuman}{HTML}{1E8449}
+\definecolor{cHumanFill}{HTML}{D5F5E3}
+\definecolor{cAI}{HTML}{7D3C98}
+\definecolor{cAIFill}{HTML}{E8DAEF}
+\definecolor{cEdge}{HTML}{5D6D7E}
+\definecolor{cDash}{HTML}{ABB2B9}
+
+\begin{document}
+\begin{tikzpicture}[
+  % --- Node styles ---
+  platform/.style={
+    rectangle, rounded corners=4pt,
+    draw=cPlat, line width=1.2pt, fill=cPlatFill,
+    minimum width=2.6cm, minimum height=0.75cm,
+    font=\bfseries\small, text=cPlat
+  },
+  hnode/.style={
+    rectangle, rounded corners=3pt,
+    draw=cHuman!80!black, line width=0.7pt, fill=cHumanFill,
+    minimum height=0.5cm,
+    font=\footnotesize\bfseries, text=cHuman!30!black,
+    inner xsep=3pt
+  },
+  aidot/.style={
+    circle, fill=cAI!30, draw=cAI!45,
+    line width=0.2pt, minimum size=5pt, inner sep=0pt
+  },
+  ainote/.style={
+    rectangle, rounded corners=2pt,
+    draw=cAI!45, line width=0.3pt, fill=cAIFill,
+    font=\tiny\bfseries, text=cAI!70!black,
+    inner xsep=2pt, inner ysep=1.5pt
+  },
+  % --- Edge styles ---
+  redge/.style={-{Stealth[length=3.5pt,width=2.5pt]}, cEdge, line width=0.5pt},
+  dredge/.style={-{Stealth[length=3pt,width=2pt]}, cEdge!50, line width=0.4pt, densely dashed},
+  aedge/.style={-{Stealth[length=2.5pt,width=2pt]}, cAI!30, line width=0.3pt},
+]
+
+% ====================================================
+%  LEVEL 0 — Hardware native problems (tree roots)
+% ====================================================
+\node[platform] (udmis) at (-1.8, 0) {UD-MIS on grids};
+\node[platform] (qubo)  at ( 1.8, 0) {QUBO};
+\node[font=\normalsize, below=1pt of udmis] {（里德堡原子阵列）};
+\node[font=\normalsize, below=1pt of qubo]  {（D-Wave量子退火机）};
+
+% ====================================================
+%  LEVEL 1 — Human-discovered reductions (~10 rules)
+% ====================================================
+% Left subtree: problems reducing to UD-MIS via MIS
+\node[hnode] (sp)  at (-5.2, 1.8) {Set Packing};
+\node[hnode] (vc)  at (-4.2, 2.7) {Vertex Cover};
+\node[hnode] (mis) at (-3.0, 1.4) {MIS};
+\node[hnode] (sat) at (-1.6, 2.7) {3-SAT};
+\node[hnode] (clq) at (-0.6, 1.9) {Clique};
+
+% Right subtree: problems reducing to QUBO
+\node[hnode] (mc) at ( 1.0, 1.4) {MAX-CUT};
+\node[hnode] (gc) at ( 2.5, 2.8) {Graph Coloring};
+\node[hnode] (sc) at ( 4.2, 1.5) {Set Cover};
+\node[hnode] (hc) at ( 5.2, 2.6) {Hamilton Cycle};
+\node[hnode] (np) at ( 6.4, 1.6) {Num.\ Partition};
+
+% Reduction edges (downward = reduction direction)
+\draw[redge] (mis) -- (udmis);
+\draw[redge] (clq) -- (udmis);
+\draw[redge] (sp)  -- (udmis);
+\draw[redge] (sat) -- (mis);
+\draw[redge] (vc)  -- (mis);
+\draw[redge] (mc)  -- (qubo);
+\draw[redge] (gc)  -- (qubo);
+\draw[redge] (sc)  -- (qubo);
+\draw[redge] (hc)  -- (qubo);
+\draw[redge] (np)  -- (qubo);
+% Cross-reduction
+\draw[redge] (vc.south east) to[bend right=10] (qubo.north west);
+
+% ====================================================
+%  DIVIDER — boundary between human and AI discovery
+% ====================================================
+\draw[cDash, line width=0.6pt, dashed] (-6.0, 3.5) -- (7.2, 3.5);
+
+% ====================================================
+%  LEVEL 2 — AI-discovered reductions (~100+ rules)
+%  Staggered dot grid forming a tree-canopy shape
+% ====================================================
+% Row 1 (y=4.0)
+\foreach \x in {-4.8,-3.4,-2.0,-0.6, 0.8, 2.2, 3.6, 5.0}
+  {\node[aidot] at (\x, 4.0) {};}
+% Row 2 (y=4.35)
+\foreach \x in {-5.4,-4.0,-2.6,-1.2, 0.2, 1.6, 3.0, 4.4, 5.4, 6.2}
+  {\node[aidot] at (\x, 4.35) {};}
+% Row 3 (y=4.7)
+\foreach \x in {-5.6,-4.3,-3.0,-1.7,-0.4, 0.9, 2.2, 3.5, 4.8, 5.7, 6.4}
+  {\node[aidot] at (\x, 4.7) {};}
+% Row 4 (y=5.05)
+\foreach \x in {-5.2,-3.9,-2.6,-1.3, 0.0, 1.3, 2.6, 3.9, 5.2, 6.0}
+  {\node[aidot] at (\x, 5.05) {};}
+% Row 5 (y=5.4)
+\foreach \x in {-4.6,-3.3,-2.0,-0.7, 0.6, 1.9, 3.2, 4.5, 5.6}
+  {\node[aidot] at (\x, 5.4) {};}
+% Row 6 (y=5.75)
+\foreach \x in {-3.6,-2.3,-1.0, 0.3, 1.6, 2.9, 4.2}
+  {\node[aidot] at (\x, 5.75) {};}
+% Row 7 (y=6.1)
+\foreach \x in {-2.2,-0.8, 0.6, 2.0, 3.4}
+  {\node[aidot] at (\x, 6.1) {};}
+
+% Representative labeled problems in AI layer
+\node[ainote] at (-4.5, 4.2)  {Scheduling};
+\node[ainote] at ( 5.2, 4.2)  {TSP};
+\node[ainote] at (-2.0, 4.9)  {$k$-SAT};
+\node[ainote] at ( 2.6, 4.9)  {Steiner Tree};
+\node[ainote] at ( 0.3, 5.9)  {Bin Packing};
+\node[ainote] at (-3.6, 5.6)  {Dominating Set};
+\node[ainote] at ( 4.5, 5.6)  {Max $k$-Cut};
+
+% A few edges from AI layer to human layer
+\draw[aedge] (-3.4, 3.8) -- (sat.north);
+\draw[aedge] (-0.6, 3.8) -- (vc.north east);
+\draw[aedge] ( 0.8, 3.8) -- (gc.north);
+\draw[aedge] ( 2.2, 3.8) -- (mc.north);
+\draw[aedge] ( 5.0, 3.8) -- (hc.north);
+\draw[aedge] ( 6.0, 3.8) -- (np.north);
+
+% Ellipsis suggesting continued growth
+\node[font=\normalsize, text=cAI!50] at (0.4, 6.5) {$\cdots$};
+
+% ====================================================
+%  ANNOTATIONS
+% ====================================================
+% Right brace: Human-discovered (bottom)
+\draw[decorate, decoration={brace, amplitude=6pt},
+      cHuman!60, line width=0.7pt]
+  (7.8, 3.3) -- (7.8, 0.8)
+  node[midway, right=8pt, font=\normalsize, text=cHuman!60!black, align=left]
+  {人工设计\\$\sim$\!10条规则};
+
+% Right brace: AI-discovered (top)
+\draw[decorate, decoration={brace, amplitude=6pt},
+      cAI!60, line width=0.7pt]
+  (7.8, 6.4) -- (7.8, 3.7)
+  node[midway, right=8pt, font=\normalsize, text=cAI!70!black, align=left]
+  {AI辅助设计\\$\sim$\!100+条规则};
+
+% Right brace: Hardware native problems (bottom)
+\draw[decorate, decoration={brace, amplitude=6pt},
+      cPlat!80, line width=0.7pt]
+  (7.8, 0.5) -- (7.8, -0.5)
+  node[midway, right=8pt, font=\normalsize, text=cPlat!80, align=left]
+  {硬件原生问题};
+\end{tikzpicture}
+\end{document}
