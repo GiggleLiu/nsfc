@@ -7,7 +7,7 @@
 project:
   name: nsfc2026-llm-problem-reduction
   version: 1.0.0
-  description: NSFC 2026 面上项目申请书 - LLM辅助面向物理计算平台的问题规约自动发现与验证
+  description: NSFC 2026 面上项目申请书 - LLM辅助组合优化问题规约的自动发现、验证与编译
   type: NSFC_General  # 面上项目
   year: 2026
   applicant: 刘金国
@@ -17,16 +17,16 @@ project:
 # ============================================================================
 
 research:
-  title_zh: LLM辅助面向物理计算平台的问题规约自动发现与验证
-  title_en: LLM-assisted Automatic Discovery and Verification of Problem Reductions for Physical Computing Platforms
+  title_zh: LLM辅助组合优化问题规约的自动发现、验证与编译
+  title_en: LLM-assisted Automatic Discovery, Verification and Compilation of Problem Reductions for Combinatorial Optimization
 
   directions:
-    - name: LLM辅助规约小工具自动发现
-      description: 利用LLM + ILP自动生成和验证规约小工具
-    - name: 规约正确性形式化验证
-      description: 与Lean4/mathlib定理证明器集成
-    - name: 硬件感知规约优化
-      description: 针对Rydberg/D-Wave/TN的硬件感知优化
+    - name: 规约代价模型与路径优化
+      description: 将规约选择形式化为多项式代价图上的路径优化（编译器优化理论）
+    - name: LLM驱动的规约规则自动合成
+      description: 利用LLM + ILP自动合成和验证规约规则（自动化程序合成）
+    - name: 问题规约编译器设计与实现
+      description: 基于problem-reductions构建端到端编译器系统
 
 # ============================================================================
 # 语言配置

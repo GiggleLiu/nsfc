@@ -95,14 +95,14 @@ xelatex 面上项目-正文-2026.tex
 
 ## 研究主题速查
 
-**LLM辅助面向物理计算平台的问题规约自动发现与验证**
+**LLM辅助组合优化问题规约的自动发现、验证与编译**
 
 三个研究方向：
-1. LLM辅助规约小工具自动发现（LLM + ILP）
-2. 规约正确性形式化验证（Lean4/mathlib）
-3. 硬件感知规约优化（Rydberg/D-Wave/TN）
+1. 规约代价模型与路径优化（编译器优化理论）
+2. LLM驱动的规约规则自动合成（LLM + ILP程序合成）
+3. 问题规约编译器设计与实现（基于problem-reductions）
 
-核心引用：`Ebadi2022Science`, `Liu2021PRL`, `Liu2023SIAM`, `Pan2025Triangular`, `AlphaEvolve2025`
+核心引用：`Ebadi2022Science`, `Liu2021PRL`, `Liu2023SIAM`, `Pan2025Triangular`, `AlphaEvolve2025`, `ProblemReductions2025`
 
 ## Skills
 

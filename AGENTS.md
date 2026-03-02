@@ -1,6 +1,6 @@
 # NSFC 2026 面上项目 - AI 项目指令
 
-本项目为国家自然科学基金2026年度面上项目申请书，研究主题为「LLM辅助面向物理计算平台的问题规约自动发现与验证」。
+本项目为国家自然科学基金2026年度面上项目申请书，研究主题为「LLM辅助组合优化问题规约的自动发现、验证与编译」。
 
 ---
 
@@ -8,18 +8,18 @@
 
 ### 研究主题
 
-**LLM辅助面向物理计算平台的问题规约自动发现与验证**
-(LLM-assisted Automatic Discovery and Verification of Problem Reductions for Physical Computing Platforms)
+**LLM辅助组合优化问题规约的自动发现、验证与编译**
+(LLM-assisted Automatic Discovery, Verification and Compilation of Problem Reductions for Combinatorial Optimization)
 
 ### 核心科学问题
 
-如何利用大语言模型自动发现、验证和优化面向物理计算平台的问题规约规则？
+如何系统性地发现、验证和优化组合优化问题的规约规则，并构建自动化的规约编译器？
 
 ### 三个研究方向
 
-1. **LLM辅助规约小工具自动发现** - 利用LLM + ILP（整数线性规划）自动生成和验证规约小工具
-2. **规约正确性形式化验证** - 与Lean4/mathlib定理证明器集成的形式化验证
-3. **硬件感知规约优化** - 针对里德堡原子阵列、D-Wave量子退火机、张量网络的硬件感知优化
+1. **规约代价模型与路径优化** - 将规约选择形式化为多项式代价图上的路径优化（编译器优化理论）
+2. **LLM驱动的规约规则自动合成** - 利用LLM + ILP自动合成和验证规约规则（自动化程序合成）
+3. **问题规约编译器设计与实现** - 基于problem-reductions构建端到端编译器系统
 
 ### 目录结构
 
@@ -171,10 +171,13 @@ xelatex → bibtex → xelatex → xelatex
 | 中文 | 英文 | 说明 |
 |------|------|------|
 | 问题规约 | problem reduction | 将一个问题映射到另一个问题 |
+| 规约编译器 | reduction compiler | 自动完成问题到求解器的映射 |
+| 规约合成 | reduction synthesis | LLM驱动的规约规则自动生成 |
+| 编译后端 | compilation backend | 目标求解器平台（量子/经典） |
 | 小工具 | gadget | 编码源问题约束的基本结构 |
-| 里德堡原子阵列 | Rydberg atom arrays | 量子计算平台 |
-| D-Wave量子退火机 | D-Wave quantum annealer | 量子退火硬件 |
-| 张量网络 | tensor networks | 计算方法 |
+| 里德堡原子阵列 | Rydberg atom arrays | 量子优化后端 |
+| D-Wave量子退火机 | D-Wave quantum annealer | 量子退火后端 |
+| 张量网络 | tensor networks | 计算方法/验证工具 |
 | QUBO | Quadratic Unconstrained Binary Optimization | 二次无约束二值优化 |
 | MIS | Maximum Independent Set | 最大独立集 |
 | 单位圆盘图 | unit-disk graph | 里德堡阵列的原生问题 |
@@ -185,9 +188,9 @@ xelatex → bibtex → xelatex → xelatex
 
 | 文件 | 内容 | 状态 |
 |------|------|------|
-| `一依据.tex` | 立项依据 | ✅ 已完成 |
-| `二内容.tex` | 研究内容 | ✅ 已完成 |
-| `三1基础.tex` | 研究基础 | ✅ 已完成 |
+| `一依据.tex` | 立项依据 | ✅ 已完成（软件化重构） |
+| `二内容.tex` | 研究内容 | ✅ 已完成（软件化重构） |
+| `三1基础.tex` | 研究基础 | ✅ 已完成（软件化重构） |
 | `三2条件.tex` | 工作条件 | ✅ 已完成 |
 | `三3正承担.tex` | 正在承担项目 | ✅ 已完成 |
 | `三4已完成.tex` | 已完成项目 | ✅ 已完成 |
