@@ -97,12 +97,30 @@ xelatex 面上项目-正文-2026.tex
 
 **LLM辅助组合优化问题规约的自动发现、验证与编译**
 
-三个研究方向：
-1. 规约代价模型与路径优化（编译器优化理论）
-2. LLM驱动的规约规则自动合成（LLM + ILP程序合成）
-3. 问题规约编译器设计与实现（基于problem-reductions）
+四个子目标（S1-S4）：
+1. **S1** 规约代价模型与路径优化（多变量多项式代价、Pareto最优路径）
+2. **S2** LLM驱动的规约规则自动合成（agentic coding + 往返测试 + 整数规划证明）
+3. **S3** 问题规约编译器设计与实现（基于problem-reductions）
+4. **S4** 量子优化后端验证（里德堡原子阵列/D-Wave量子退火机）
 
-核心引用：`Ebadi2022Science`, `Liu2021PRL`, `Liu2023SIAM`, `Pan2025Triangular`, `AlphaEvolve2025`, `ProblemReductions2025`
+### 核心概念
+
+- **Agentic coding**：有规划的AI编程范式（vs. vibe coding），通过系统化测试保障可靠性
+- **往返测试(round-trip test)**：直接求解A vs. 规约到B→求解B→提取回A，结果必须一致
+  - 整数规划求解器 = 主验证器（大多数问题已有到整数规划的规约路径）
+  - 穷举求解器 = 辅助验证器（小规模，验证整数规划规约本身）
+- **problem-reductions**：申请人开发的Rust规约编译器（20+问题类型、46条规约、MCP服务器）
+
+### 核心引用
+
+`Ebadi2022Science`, `Liu2021PRL`, `Liu2023SIAM`, `Nguyen2023PRXQuantum`(共同第一作者, 被引150+), `Pan2025Triangular`, `AlphaEvolve2025`, `Carlini2026CCC`, `ProblemReductions2025`
+
+### 写作规范
+
+- 统一术语：agentic coding（非"AI编程"）、规约合成（非"规约发现"）
+- 概念先定义再使用（如质量因子$Q$、MCP全称等）
+- 避免Rust实现细节的jargon（如inventory、ReduceTo trait），用通俗语言描述
+- 引用数据不重复（如"被引150+次"仅在首次提及KSG编码时出现）
 
 ## Skills
 
