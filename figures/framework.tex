@@ -47,7 +47,7 @@
 
 % === ROW 3 (y=-2.6): Method ===
 \node[methodbox] (llm)    at (0.8, -2.6) {LLM生成};
-\node[methodbox] (verify)  at (3.6, -2.6) {ILP验证};
+\node[methodbox] (verify)  at (3.6, -2.6) {往返测试验证};
 \node[methodbox] (rules)  at (6.5, -2.6) {规约知识库\\(100+规则)};
 
 % === Arrows: main flow ===
@@ -72,25 +72,20 @@
 % === Group labels ===
 \node[glabel, text=theorycolor!80!black,
       above left=0.15cm and 0cm of theory.north west, anchor=south west]
-  {研究内容一：理论基础};
+  {研究内容一：编译器与路径优化};
 \node[glabel, text=methodcolor!80!black,
       below=0.15cm of rules.south east, anchor=north east]
-  {研究内容二：方法创新};
-\node[glabel, text=systemcolor!40!black,
-      above left=0.05cm and -0.3cm of compiler.north west, anchor=south west]
-  {研究内容三：系统构建};
+  {研究内容二：规模化规约合成};
 \node[glabel, text=validcolor!80!black,
       above left=0.15cm and 0cm of rydberg.north west, anchor=south west]
-  {研究内容四：实验验证};
+  {研究内容三：后端验证};
 
 % === Background boxes ===
 \begin{scope}[on background layer]
     \node[draw=theorycolor!80!black, fill=theorycolor!8, rounded corners,
-          fit=(theory)(pareto), inner sep=0.2cm] {};
+          fit=(theory)(pareto)(compiler), inner sep=0.25cm] {};
     \node[draw=methodcolor!80!black, fill=methodcolor!8, rounded corners,
           fit=(llm)(verify)(rules), inner sep=0.2cm] {};
-    \node[draw=systemcolor!80!black, fill=systemcolor!12, rounded corners,
-          fit=(compiler), inner sep=0.1cm] {};
     \node[draw=validcolor!80!black, fill=validcolor!12, rounded corners,
           fit=(rydberg)(dwave), inner sep=0.2cm] {};
 \end{scope}
