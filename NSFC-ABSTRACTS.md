@@ -1,22 +1,22 @@
 # 标题建议
 
-推荐标题：面向量子优化平台的问题规约自动发现、验证与编译方法
+推荐标题：LLM辅助组合优化问题规约的自动发现、验证与编译
 
-1) 面向量子优化平台的问题规约自动发现、验证与编译方法 —— 理由：方法向，三个核心动词（发现、验证、编译）精准对应S2/S1/S3三个子目标，"面向量子优化平台"限定场景，符合信息科学部偏好，25字符
-2) LLM辅助面向物理计算平台的问题规约自动发现与验证 —— 理由：延续前期工作题目风格，"物理计算平台"覆盖面更广（含张量网络后端），突出LLM方法创新，25字符
-3) 量子优化问题的多步规约代价模型与自动编译器构建 —— 理由：判据向，突出"代价模型"理论贡献与"编译器"系统产出，强调可验证的理论与工程终点，23字符
-4) 大语言模型驱动的组合优化问题规约发现与量子平台验证 —— 理由：场景向，突出LLM技术手段和量子平台实验验证，强调从方法到硬件的研究闭环，27字符
-5) 面向量子优化硬件的组合优化问题规约理论与自动编译方法 —— 理由：整合向，同时突出"理论"与"方法"双重贡献，"量子优化硬件"直指实验平台，强调跨理论与系统的整体性，27字符
+1) LLM辅助组合优化问题规约的自动发现、验证与编译 —— 理由：方法向，三个核心动词（发现、验证、编译）对应S2/S1/S3三个子目标，"LLM辅助"突出技术路径，24字符，信息科学部偏好
+2) 面向组合优化求解器的问题规约编译方法与自动合成 —— 理由：场景向，"面向求解器"锚定软件自动化场景，突出编译器作为核心产出，淡化量子背景，21字符
+3) 组合优化问题规约的代价模型、自动合成与编译器构建 —— 理由：判据向，三个并列名词直接对应三个研究方向，突出理论（代价模型）+方法（合成）+系统（编译器）三重贡献，24字符
+4) LLM驱动的组合优化规约自动合成与编译优化方法 —— 理由：方法向精简版，强调LLM驱动与编译优化两个方法创新点，避免过长从句，21字符
+5) 面向专用求解器的问题规约自动编译：理论、合成与系统 —— 理由：整合向，冒号后三点明示贡献维度，"专用求解器"覆盖量子与经典后端，25字符
 
 # 中文摘要
 
-量子优化平台（里德堡原子阵列、量子退火机）正迈向实用化规模，但将实际NP难问题映射到平台原生表示需要多步规约链，面临小工具设计的组合爆炸、正确性验证困难和规模化发现不足三重挑战。当前规约设计依赖手工试错，缺乏代价建模理论、规模化发现方法和可证明正确性保障。申请人前期利用整数线性规划在约1600万种构型中自动发现最优编码小工具，验证了计算机辅助规约发现的可行性；据此提出LLM驱动的测试驱动方法可将发现能力扩展至百条以上。本项目将：(1)建立多变量多项式代价模型与Pareto最优路径搜索理论；(2)发展LLM与ILP结合的测试驱动规约发现方法，实现100+规约规则的发现与正确性证明；(3)构建集成规约知识库、路径规划与硬件后端的端到端编译器；(4)在代表性量子优化平台上完成系统性实验验证。本项目将为量子优化问题映射建立理论基础与自动化工具体系，构建开源规约编译器生态，降低量子硬件使用门槛。
+组合优化问题广泛存在于科学与工程领域，多种专用求解器各擅其长，但将用户问题经多步规约映射到求解器原生表示仍严重依赖专家经验。当前存在三个关键空白：规约代价模型与路径最优性理论尚未建立、规模化规约合成缺乏系统方法、端到端自动编译工具链尚不完备。申请人已构建problem-reductions开源库（20+问题类型、46条规约规则）并验证了ILP辅助合成的可行性；据此提出LLM驱动的测试驱动方法可将规模扩展至100+条。本项目拟：(1)建立多变量多项式代价模型与Pareto最优路径理论；(2)提出LLM+ILP测试驱动方法合成100+规约规则并证明正确性；(3)构建端到端规约编译器；(4)在量子优化平台验证编译方案。本项目将建立规约编译的优化理论，发展LLM驱动的合成范式，构建开源编译器及规约知识库，为专用求解器提供通用接口。
 
 # English Abstract
 
-Quantum optimization platforms, including Rydberg atom arrays and quantum annealers, are approaching practical scales, yet mapping real-world NP-hard problems onto their native representations requires multi-step reduction chains, posing three key challenges: combinatorial explosion in gadget design, difficulty in correctness verification, and insufficient scalability of discovery. Current reduction design relies on expert trial-and-error, lacking cost modeling theory, scalable discovery methods, and provable correctness guarantees. Our prior work used integer linear programming (ILP) to automatically discover optimal encoding gadgets from approximately 16 million configurations, validating the feasibility of computer-aided reduction discovery; we hypothesize that large language model (LLM)-driven test-driven methods can extend this capability to over one hundred rules. This project will: (1) establish polynomial cost model theory and Pareto-optimal path search algorithms for multi-step reduction chains; (2) develop an LLM-and-ILP-driven test-driven reduction discovery method to achieve discovery and correctness proofs of 100+ reduction rules covering at least 15 NP-hard problem types; (3) build an end-to-end reduction compiler integrating a reduction knowledge base, path planner, and hardware backends; and (4) conduct systematic experimental validation on a representative quantum optimization platform. This work will establish theoretical foundations and automated tools for quantum optimization problem mapping, create an open-source reduction compiler ecosystem, and lower the barrier for experimental researchers to leverage quantum hardware.
+Combinatorial optimization problems arise pervasively in science and engineering. Various specialized solvers excel at their native problem types, yet mapping user problems to solver-native representations via multi-step reductions remains heavily dependent on expert experience. Three critical gaps persist: cost models and path optimality theory for reductions have not been established, scalable reduction synthesis lacks systematic methods, and end-to-end automated compilation toolchains are incomplete. The applicant has built the open-source problem-reductions library (20+ problem types, 46 verified reduction rules) and validated the feasibility of ILP-assisted synthesis; accordingly, we propose that LLM-driven test-driven methods can scale rule synthesis to 100+ rules. This project will: (1) establish multivariate polynomial cost models and Pareto-optimal path theory; (2) develop LLM+ILP test-driven methods to synthesize 100+ reduction rules with provable correctness; (3) build an end-to-end reduction compiler; and (4) validate compilation outputs on quantum optimization platforms. This work will establish compiler optimization theory for problem reductions, develop an LLM-driven synthesis paradigm, build an open-source compiler and reduction knowledge base, and provide a universal automated interface for specialized solvers.
 
 ## 长度自检
 
-- 中文摘要字符数：398/400 ✅
-- 英文摘要字符数：1670/4000 ✅
+- 中文摘要字符数：366/400 ✅
+- 英文摘要字符数：1349/4000 ✅
