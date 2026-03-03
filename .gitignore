@@ -153,3 +153,4 @@ skills/**/__pycache__/
 *.pdf
 *.synctex(busy)
 runs/
+*.xdv
