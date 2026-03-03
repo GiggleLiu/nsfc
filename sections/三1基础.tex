@@ -34,13 +34,6 @@
 
 \textbf{2. 方法可行性（对应S2）}
 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.8\textwidth]{figures/new_main.pdf}
-    \caption{三角晶格编码示意图}
-    \label{fig:reduction-triangular}
-\end{figure}
-
 申请人已在三角晶格编码工作中验证了整数规划辅助规约合成的有效性（在$4^{12}$搜索空间中成功发现最优小工具）。更重要的是，problem-reductions已具备完整的自动化验证基础设施：绝大多数问题类型已实现到整数规划的规约路径，这使得\textbf{往返测试}（直接求解 vs. 规约后求解再提取）可以自动化地大规模执行，辅以穷举求解器在小规模上验证整数规划规约本身的正确性。将LLM与整数规划结合的思路受AlphaEvolve\cite{AlphaEvolve2025}启发，后者已在50余个数学问题中展示了LLM+自动验证的强大能力。本项目将三者有机结合——LLM负责创意生成、整数规划往返测试负责自动化验证、测试驱动方法负责质量保证——形成互补的方法体系。problem-reductions的MCP服务器已支持LLM智能体直接操作规约图，为合成循环提供了现成的基础设施。
 
 \textbf{3. 系统可行性（对应S3）}
