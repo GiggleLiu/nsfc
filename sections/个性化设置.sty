@@ -6,7 +6,18 @@
 %【3】是否屏蔽正文
 %\global\MS@offtrue\global\MS@onfalse%屏蔽正文
 \global\MS@ontrue\global\MS@offfalse%不屏蔽正文
-%【4】设置数学字体
+%【4】subsection标题加粗
+\makeatletter
+\renewcommand\nostarsubsection[1]{%
+    \refstepcounter{subsection}\begingroup\color{HighLight}
+    \vspace{6pt}
+    \MSzh\MSen\fontsize{13pt}{22pt}\selectfont\bfseries%
+    \setlength{\baselineskip}{22pt}%
+    \par\indent\hspace{3pt}\arabic{section}.\arabic{subsection}#1\par
+    \vspace{2pt}
+    \endgroup}
+\makeatother
+%【5】设置数学字体
 \global\def\selectedmathfont{latinmodern-math}
 %可选字体：latinmodern-math，asana-math，cambria-math，
 %texgyrebonum-math，texgyreschola-math，
