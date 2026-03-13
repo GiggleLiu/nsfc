@@ -8,6 +8,7 @@
 \global\MS@ontrue\global\MS@offfalse%不屏蔽正文
 %【4】subsection标题加粗
 \makeatletter
+\AtBeginDocument{%
 \renewcommand\nostarsubsection[1]{%
     \refstepcounter{subsection}\begingroup\color{HighLight}
     \vspace{6pt}
@@ -15,7 +16,7 @@
     \setlength{\baselineskip}{22pt}%
     \par\indent\hspace{3pt}\arabic{section}.\arabic{subsection}#1\par
     \vspace{2pt}
-    \endgroup}
+    \endgroup}}
 \makeatother
 %【5】设置数学字体
 \global\def\selectedmathfont{latinmodern-math}
